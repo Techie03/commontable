@@ -39,6 +39,11 @@ export default function Home() {
           <span className="pilot-badge">
             Now building. Piloting in Denton, TX.
           </span>
+          <div>
+            <a className="hero-cta" href="/prototype">
+              Try the live prototype
+            </a>
+          </div>
         </div>
       </section>
 
@@ -192,6 +197,15 @@ export default function Home() {
             disclosed before checkout.
           </p>
           <DemoWalkthrough />
+          <p className="prototype-cta-wrap">
+            <a className="prototype-cta" href="/prototype">
+              Try the live prototype
+            </a>
+            <span>
+              Place a demo order and follow it through every role: customer,
+              restaurant, driver, and admin.
+            </span>
+          </p>
           <div className="how-grid">
             <div className="how-block">
               <h3>For customers</h3>
