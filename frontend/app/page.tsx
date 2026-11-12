@@ -3,6 +3,8 @@
 // Landing page only: no ordering, account, or app functionality here.
 // Prices are labeled as planning hypotheses, per the blueprint.
 
+import DemoWalkthrough from "./demo";
+
 export default function Home() {
   return (
     <main>
@@ -189,6 +191,7 @@ export default function Home() {
             direct menu price, with the delivery fee, tax, and optional tip
             disclosed before checkout.
           </p>
+          <DemoWalkthrough />
           <div className="how-grid">
             <div className="how-block">
               <h3>For customers</h3>

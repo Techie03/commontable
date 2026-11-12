@@ -23,6 +23,15 @@ out/
 *.p12
 secrets/
 
+# Local-only demo media — the GitHub snapshot push (push_files) can only
+# carry UTF-8 text files, so binary assets are never pushed. The landing
+# page falls back to the CSS route animation when demo-journey.mp4 is
+# absent (for example on a deploy built from GitHub).
+frontend/public/demo-journey.mp4
+
+# Local-only LinkedIn assets (post images and drafts) — never pushed.
+linkedin/
+
 # Databases / local state
 *.db
 *.sqlite3
