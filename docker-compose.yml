@@ -1,0 +1,36 @@
+services:
+  db:
+    # PostgreSQL + PostGIS (spec §8: database / geo layer).
+    # PostGIS provides service-zone polygons and distance/proximity
+    # queries for the serviceability check and dispatch matching.
+    image: postgis/postgis:16-3.4
+    container_name: commontable-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-commontable}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-commontable_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-commontable}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - commontable_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-commontable} -d ${POSTGRES_DB:-commontable}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Redis is reserved for the background-job queue (notifications,
+  # settlement runs, dispatch evaluation). It is not wired to any
+  # application code in this scaffold.
+  redis:
+    image: redis:7-alpine
+    container_name: commontable-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    profiles:
+      - queue
+
+volumes:
+  commontable_pgdata:
