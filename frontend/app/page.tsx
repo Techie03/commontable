@@ -93,11 +93,11 @@ export default function Home() {
 
       <section className="section tint" id="concepts">
         <div className="container">
-          <h2>Two concepts, one network</h2>
+          <h2>One network, two ways to order</h2>
           <p className="lede">
-            CommonTable is the platform. Direct2Door is the service that
-            brings delivery to a restaurant&apos;s own ordering channel. Both
-            run on the same shared local driver network.
+            CommonTable and Direct2Door are not two separate services. They
+            are two ways to order from the same shared local driver network.
+            The only difference is where you order.
           </p>
           <div className="concept-grid">
             <article className="concept platform">
@@ -133,6 +133,49 @@ export default function Home() {
               </ul>
             </article>
           </div>
+          <table className="concept-compare">
+            <thead>
+              <tr>
+                <th></th>
+                <th>CommonTable</th>
+                <th>Direct2Door</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>Where you order</th>
+                <td>In the CommonTable app</td>
+                <td>On the restaurant&apos;s own website</td>
+              </tr>
+              <tr>
+                <th>What you see</th>
+                <td>Many local restaurants in one place</td>
+                <td>One restaurant, its own channel</td>
+              </tr>
+              <tr>
+                <th>Whose brand you see</th>
+                <td>CommonTable</td>
+                <td>The restaurant&apos;s</td>
+              </tr>
+              <tr>
+                <th>Who delivers</th>
+                <td>The shared CommonTable driver network</td>
+                <td>The same shared driver network</td>
+              </tr>
+              <tr>
+                <th>What the restaurant keeps</th>
+                <td>Its menu pricing and brand</td>
+                <td>
+                  Its menu pricing, brand, and direct customer relationship
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p className="concept-summary">
+            Short version: CommonTable is the app for ordering from many
+            local restaurants. Direct2Door is delivery from one
+            restaurant&apos;s own website. Same drivers either way.
+          </p>
         </div>
       </section>
 

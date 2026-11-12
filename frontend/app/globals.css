@@ -317,6 +317,52 @@ a {
   margin-bottom: 0.35rem;
 }
 
+.concept-compare {
+  width: 100%;
+  margin: 1.75rem 0 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  overflow: hidden;
+  font-size: 0.98rem;
+}
+
+.concept-compare th,
+.concept-compare td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.concept-compare thead th {
+  background: var(--forest);
+  color: #fff;
+}
+
+.concept-compare tbody th {
+  color: var(--forest);
+  font-weight: 700;
+}
+
+.concept-compare tbody td {
+  color: var(--charcoal-soft);
+}
+
+.concept-compare tbody tr:last-child th,
+.concept-compare tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.concept-summary {
+  margin: 1.25rem 0 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--forest);
+}
+
 /* Delivery options */
 
 .price-grid {

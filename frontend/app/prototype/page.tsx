@@ -269,8 +269,13 @@ function CustomerView({
       </div>
       <p className="proto-channel-note">
         {channel === "CommonTable"
-          ? "You are ordering in the CommonTable app."
-          : "You are ordering from the restaurant\u2019s own website. Delivery is fulfilled by the CommonTable driver network."}
+          ? "You are ordering in the CommonTable app, where many local restaurants are listed in one place."
+          : "You are ordering from the restaurant\u2019s own website. Same menu, same drivers, no CommonTable app needed."}
+      </p>
+      <p className="proto-channel-note">
+        The difference is where you order. CommonTable is the app.
+        Direct2Door is the restaurant&apos;s own website. Both use the same
+        driver network.
       </p>
 
       <div className="proto-customer-grid">
