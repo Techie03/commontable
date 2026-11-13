@@ -48,7 +48,8 @@ interface AuthContextValue {
   register: (
     email: string,
     password: string,
-    fullName: string
+    fullName: string,
+    role?: string
   ) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
@@ -108,10 +109,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(
-    async (email: string, password: string, fullName: string) => {
+    async (email: string, password: string, fullName: string, role?: string) => {
       setBusy(true);
       try {
-        const res = await apiRegister(email, password, fullName);
+        const res = await apiRegister(email, password, fullName, role ?? "customer");
         storeTokens(res.access_token, res.refresh_token);
         storeUser(res.user);
         setUser(res.user);

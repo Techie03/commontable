@@ -4,10 +4,11 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, get_driver_profile, require_roles
-from app.core.errors import not_found
+from app.core.errors import forbidden, not_found
 from app.db.session import get_db
 from app.models.common import utcnow
 from app.models.drivers import (
+    ONBOARDING_APPROVED,
     TASK_ACCEPTED,
     TASK_DELIVERED,
     TASK_OFFERED,
@@ -146,6 +147,8 @@ async def set_availability(
     db: Session = Depends(get_db),
 ):
     driver = get_driver_profile(user, db)
+    if body.online and driver.onboarding_status != ONBOARDING_APPROVED:
+        raise forbidden("Driver onboarding is not approved yet")
     was_online = driver.online
     driver.online = body.online
     if body.online and not was_online:

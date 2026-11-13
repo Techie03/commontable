@@ -1,4 +1,4 @@
-"""Auth router: register (customer only), login, refresh, logout."""
+"""Auth router: register (customer, restaurant owner, driver), login, refresh, logout."""
 
 from datetime import datetime, timezone
 
@@ -15,7 +15,17 @@ from app.core.security import (
     verify_password,
 )
 from app.db.session import get_db
-from app.models.identity import Customer, RevokedToken, Role, User, UserRole
+from app.models.drivers import Driver
+from app.models.identity import (
+    ROLE_CUSTOMER,
+    ROLE_DRIVER,
+    ROLE_RESTAURANT_OWNER,
+    Customer,
+    RevokedToken,
+    Role,
+    User,
+    UserRole,
+)
 from app.models.common import utcnow
 from app.schemas.auth import (
     AuthResponse,
@@ -37,20 +47,35 @@ def _issue_tokens(user: User) -> AuthResponse:
     )
 
 
-def _grant_customer_role(db: Session, user: User) -> None:
-    role = db.query(Role).filter(Role.name == "customer").first()
+# Roles a visitor may choose at signup. Dispatcher, admin, and the other
+# restaurant staff roles are granted by an admin, never self-assigned.
+SELF_SERVICE_ROLES = {ROLE_CUSTOMER, ROLE_RESTAURANT_OWNER, ROLE_DRIVER}
+
+
+def _grant_role(db: Session, user: User, role_name: str) -> None:
+    role = db.query(Role).filter(Role.name == role_name).first()
     if role is None:
-        role = Role(name="customer", description="Customer")
+        role = Role(name=role_name, description=role_name.replace("_", " ").title())
         db.add(role)
         db.flush()
     db.add(UserRole(user_id=user.id, role_id=role.id))
-    db.add(Customer(user_id=user.id))
+    if role_name == ROLE_CUSTOMER:
+        db.add(Customer(user_id=user.id))
+    elif role_name == ROLE_DRIVER:
+        # Onboarding starts as "applied"; an admin approves before the
+        # driver can go online (see drivers.set_availability).
+        db.add(Driver(user_id=user.id))
+    # Restaurant owners have no restaurant linked yet; an admin links one,
+    # or the owner enters a restaurant id on the dashboard.
 
 
 @router.post("/register", response_model=AuthResponse, status_code=201)
 def register(body: RegisterRequest, db: Session = Depends(get_db)):
-    """Create a customer account. Only the customer role is granted here;
-    staff/driver/dispatcher/admin roles are granted by an admin."""
+    """Create an account with the requested self-service role (customer,
+    restaurant_owner, or driver; default customer). Staff roles are granted
+    by an admin."""
+    if body.role not in SELF_SERVICE_ROLES:
+        raise bad_request("That role cannot be chosen at signup")
     existing = db.query(User).filter(User.email == body.email).first()
     if existing is not None:
         raise conflict("An account with that email already exists")
@@ -61,7 +86,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
     )
     db.add(user)
     db.flush()
-    _grant_customer_role(db, user)
+    _grant_role(db, user, body.role)
     db.commit()
     db.refresh(user)
     return _issue_tokens(user)

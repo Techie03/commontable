@@ -6,6 +6,7 @@
 
 import DemoWalkthrough from "./demo";
 import HomeLiveSections from "./home-live";
+import PortalsDropdown from "@/components/PortalsDropdown";
 
 export default function Home() {
   return (
@@ -25,6 +26,12 @@ export default function Home() {
             <a href="#how-it-works">How it works</a>
             <a href="#roadmap">Roadmap</a>
           </nav>
+          <div className="topbar-actions">
+            <PortalsDropdown />
+            <a className="topbar-signin" href="/login">
+              Sign in
+            </a>
+          </div>
           <span className="status-pill">In development</span>
         </div>
       </header>

@@ -11,6 +11,10 @@ class RegisterRequest(BaseModel):
     email: str = Field(min_length=3, max_length=255)
     password: str = Field(min_length=8, max_length=128)
     full_name: str = Field(min_length=1, max_length=255)
+    # Self-service role: customer, restaurant_owner, or driver.
+    # Dispatcher, admin, and the other restaurant staff roles are granted
+    # by an admin, never self-assigned.
+    role: str = "customer"
 
 
 class LoginRequest(BaseModel):

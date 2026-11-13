@@ -56,7 +56,7 @@ PLACED → ACCEPTED → PREPARING → READY → ASSIGNED → PICKED_UP → DELIV
 ### Auth and identity
 | Method & path | Role | Notes |
 |---|---|---|
-| `POST /api/v1/auth/register` | public | Creates a **customer** account only. Body: email, password, full_name. Returns user + tokens. |
+| `POST /api/v1/auth/register` | public | Creates an account with a self-service role. Body: email, password, full_name, role (`customer` \| `restaurant_owner` \| `driver`; default `customer`). Other roles are rejected (400); dispatcher/admin are granted by an admin. Driver signup creates a driver profile with onboarding `applied`. Returns user + tokens. |
 | `POST /api/v1/auth/login` | public | `{email, password}` → tokens + user. |
 | `POST /api/v1/auth/refresh` | public | `{refresh_token}` → new access token. |
 | `POST /api/v1/auth/logout` | auth | Revokes the refresh token (jti denylist). |
@@ -104,7 +104,7 @@ PLACED → ACCEPTED → PREPARING → READY → ASSIGNED → PICKED_UP → DELIV
 | `GET /api/v1/drivers/me/tasks` | driver | Active tasks (accepted or picked up) — the driver page restores the active delivery from here. |
 | `POST /api/v1/drivers/me/offers/{task_id}/accept` | driver | Task → accepted. Order stays ASSIGNED. |
 | `POST /api/v1/drivers/me/offers/{task_id}/decline` | driver | Task → declined. Order → READY. |
-| `PATCH /api/v1/drivers/me/availability` | driver | `{online: bool}`. |
+| `PATCH /api/v1/drivers/me/availability` | driver | `{online: bool}`. Going online requires onboarding `approved` (403 otherwise); going offline is always allowed. |
 | `GET /api/v1/drivers/me/earnings` | driver | Per-delivery pay breakdown + totals. |
 | `GET /api/v1/drivers/me` | driver | Driver profile incl. onboarding status. |
 | `POST /api/v1/deliveries/{task_id}/pickup` | assigned driver | → PICKED_UP. |

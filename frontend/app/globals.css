@@ -3118,3 +3118,139 @@ select.app-input {
   background: var(--teal);
   transform: translateY(-1px);
 }
+
+/* Header dropdowns (landing topbar + app header) */
+.header-dropdown {
+  position: relative;
+}
+
+.header-dropdown-btn {
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--forest);
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  padding: 0.45rem 0.9rem;
+  white-space: nowrap;
+}
+
+.header-dropdown-btn:hover {
+  background: var(--teal-pale);
+  border-color: var(--teal-light);
+}
+
+.header-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  min-width: 17rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.75rem 2rem rgba(18, 63, 46, 0.16);
+  padding: 0.5rem;
+  z-index: 30;
+}
+
+.header-dropdown-menu a {
+  display: block;
+  padding: 0.6rem 0.75rem;
+  border-radius: 0.5rem;
+  color: var(--charcoal);
+  text-decoration: none;
+}
+
+.header-dropdown-menu a:hover {
+  background: var(--teal-pale);
+}
+
+.header-dropdown-item-title {
+  display: block;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.header-dropdown-item-desc {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--charcoal-soft);
+}
+
+/* Landing topbar actions: portals dropdown + sign in, next to the pill */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.topbar-signin {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--teal);
+  border: 1px solid var(--teal);
+  border-radius: 0.65rem;
+  padding: 0.45rem 0.9rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.topbar-signin:hover {
+  background: var(--forest);
+  border-color: var(--forest);
+}
+
+@media (max-width: 560px) {
+  .status-pill {
+    display: none;
+  }
+}
+
+/* Role picker on the register page */
+.role-picker {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  border: 0;
+}
+
+.role-picker legend {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.role-option {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  cursor: pointer;
+  background: #fff;
+}
+
+.role-option:has(input:checked) {
+  border-color: var(--teal);
+  background: var(--teal-pale);
+}
+
+.role-option input {
+  margin-top: 0.2rem;
+  accent-color: var(--teal);
+}
+
+.role-option-title {
+  display: block;
+  font-weight: 700;
+}
+
+.role-option-desc {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--charcoal-soft);
+}

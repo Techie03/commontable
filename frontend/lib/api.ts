@@ -250,12 +250,14 @@ export function login(email: string, password: string): Promise<AuthResponse> {
 export function register(
   email: string,
   password: string,
-  fullName: string
+  fullName: string,
+  role: string = "customer"
 ): Promise<AuthResponse> {
   return post<AuthResponse>("/api/v1/auth/register", {
     email,
     password,
     full_name: fullName,
+    role,
   });
 }
 
