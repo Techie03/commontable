@@ -9,28 +9,18 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 
 export default function SiteHeader() {
-  const { user, ready, logout } = useAuth();
+  const { user, ready, logout, hasRole } = useAuth();
   const router = useRouter();
 
-  const isCustomer = user
-    ? user.roles.some((r) => r === "customer" || (typeof r === "object" && r.role === "customer"))
-    : false;
-  const isRestaurant = user
-    ? user.roles.some(
-        (r) =>
-          typeof r === "object" &&
-          ["restaurant_owner", "restaurant_manager", "restaurant_staff"].includes(r.role)
-      ) || user.roles.some((r) => typeof r === "string" && r.startsWith("restaurant_"))
-    : false;
-  const isDriver = user
-    ? user.roles.some((r) => r === "driver" || (typeof r === "object" && r.role === "driver"))
-    : false;
-  const isDispatcher = user
-    ? user.roles.some((r) => r === "dispatcher" || (typeof r === "object" && r.role === "dispatcher"))
-    : false;
-  const isAdmin = user
-    ? user.roles.some((r) => r === "admin" || (typeof r === "object" && r.role === "admin"))
-    : false;
+  const isCustomer = hasRole("customer");
+  const isRestaurant = hasRole(
+    "restaurant_owner",
+    "restaurant_manager",
+    "restaurant_staff"
+  );
+  const isDriver = hasRole("driver");
+  const isDispatcher = hasRole("dispatcher");
+  const isAdmin = hasRole("admin");
 
   const handleLogout = () => {
     logout();

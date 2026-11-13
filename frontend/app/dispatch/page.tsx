@@ -17,7 +17,14 @@ import {
   wsUrl,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { addressLine, orderLineItems, shortId, type DispatchBoard, type Order } from "@/lib/types";
+import {
+  addressLine,
+  boardDriverId,
+  orderLineItems,
+  shortId,
+  type DispatchBoard,
+  type Order,
+} from "@/lib/types";
 
 export default function DispatchPage() {
   return (
@@ -100,7 +107,8 @@ function DispatchBoardView() {
 
   const runAssign = async (orderId: string, isOverride: boolean) => {
     const driverId = selectedDriver[orderId];
-    if (!driverId) {
+    const numericDriverId = Number(driverId);
+    if (!driverId || !Number.isInteger(numericDriverId)) {
       setError("Choose a driver first.");
       return;
     }
@@ -112,9 +120,13 @@ function DispatchBoardView() {
     setError(null);
     try {
       if (isOverride) {
-        await overrideAssignment(orderId, driverId, overrideReason[orderId].trim());
+        await overrideAssignment(
+          orderId,
+          numericDriverId,
+          overrideReason[orderId].trim()
+        );
       } else {
-        await assignOrder(orderId, driverId);
+        await assignOrder(orderId, numericDriverId);
       }
       await load();
     } catch (err) {
@@ -201,8 +213,8 @@ function DispatchBoardView() {
                     >
                       <option value="">Choose a driver…</option>
                       {onlineDrivers.map((d) => (
-                        <option key={d.id} value={d.id}>
-                          {d.full_name ?? d.name ?? d.email ?? d.id}
+                        <option key={boardDriverId(d)} value={boardDriverId(d)}>
+                          {d.full_name ?? d.name ?? d.email ?? boardDriverId(d)}
                         </option>
                       ))}
                     </select>
@@ -257,8 +269,8 @@ function DispatchBoardView() {
                       >
                         <option value="">Choose a driver…</option>
                         {onlineDrivers.map((d) => (
-                          <option key={d.id} value={d.id}>
-                            {d.full_name ?? d.name ?? d.email ?? d.id}
+                          <option key={boardDriverId(d)} value={boardDriverId(d)}>
+                            {d.full_name ?? d.name ?? d.email ?? boardDriverId(d)}
                           </option>
                         ))}
                       </select>
@@ -297,9 +309,11 @@ function DispatchBoardView() {
         ) : (
           <ul className="app-list">
             {onlineDrivers.map((d) => (
-              <li key={d.id} className="app-list-row">
+              <li key={boardDriverId(d)} className="app-list-row">
                 <span>
-                  <strong>{d.full_name ?? d.name ?? d.email ?? d.id}</strong>
+                  <strong>
+                    {d.full_name ?? d.name ?? d.email ?? boardDriverId(d)}
+                  </strong>
                   <span className="app-list-sub">{d.email ?? ""}</span>
                 </span>
                 <span className="app-badge app-badge-done">Online</span>

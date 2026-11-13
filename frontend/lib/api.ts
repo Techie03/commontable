@@ -478,7 +478,10 @@ export function getDispatchBoard(): Promise<DispatchBoard> {
   return get<DispatchBoard>("/api/v1/dispatch/board");
 }
 
-export function assignOrder(orderId: string, driverId: string): Promise<void> {
+export function assignOrder(
+  orderId: string | number,
+  driverId: string | number
+): Promise<void> {
   return post<void>("/api/v1/dispatch/assign", {
     order_id: orderId,
     driver_id: driverId,
@@ -486,8 +489,8 @@ export function assignOrder(orderId: string, driverId: string): Promise<void> {
 }
 
 export function overrideAssignment(
-  orderId: string,
-  driverId: string,
+  orderId: string | number,
+  driverId: string | number,
   reason: string
 ): Promise<void> {
   return post<void>("/api/v1/dispatch/override", {

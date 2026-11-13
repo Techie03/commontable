@@ -24,13 +24,21 @@ export interface RoleAssignment {
   scope_id?: string | null;
 }
 
+/** Role row as the live API returns it: the role name is `name`. */
+export interface ApiRoleAssignment {
+  name: Role;
+  scope_type?: string;
+  scope_id?: string | number | null;
+}
+
 export interface User {
   id: string;
   email: string;
   full_name?: string;
   phone?: string | null;
-  // The API may return roles as plain strings or as {role, scope_id} rows.
-  roles: Array<RoleAssignment | string>;
+  // The live API returns roles as {name, scope_type, scope_id} rows;
+  // plain strings and {role, scope_id} rows stay supported.
+  roles: Array<RoleAssignment | ApiRoleAssignment | string>;
 }
 
 export interface AuthResponse {
@@ -251,11 +259,15 @@ export interface Earnings {
 export interface DispatchBoard {
   active_orders?: Order[];
   ready_orders?: Order[];
+  // The live API returns driver_id (not id) for online drivers.
   online_drivers?: Array<{
-    id: string;
+    driver_id?: string | number;
+    id?: string | number;
+    user_id?: string | number;
     name?: string;
     full_name?: string;
     email?: string;
+    onboarding_status?: string;
     online?: boolean;
   }>;
 }
@@ -326,12 +338,30 @@ export interface NotificationItem {
   created_at?: string;
 }
 
-/** Normalize a user's roles into {role, scope_id} rows. */
+/** Normalize a user's roles into {role, scope_id} rows. Handles all
+ *  three shapes the API may return: plain strings, {role, scope_id}
+ *  rows, and the live API's {name, scope_type, scope_id} rows. The
+ *  scope id is coerced to a string (the API returns an integer). */
 export function normalizeRoles(user: User | null): RoleAssignment[] {
   if (!user || !Array.isArray(user.roles)) return [];
-  return user.roles.map((r) =>
-    typeof r === "string" ? { role: r as Role, scope_id: null } : r
-  );
+  const out: RoleAssignment[] = [];
+  for (const r of user.roles) {
+    if (typeof r === "string") {
+      out.push({ role: r as Role, scope_id: null });
+      continue;
+    }
+    const role =
+      (r as RoleAssignment).role ?? (r as ApiRoleAssignment).name;
+    if (!role) continue;
+    const scope =
+      (r as ApiRoleAssignment).scope_id ??
+      (r as RoleAssignment).scope_id;
+    out.push({
+      role,
+      scope_id: scope == null ? null : String(scope),
+    });
+  }
+  return out;
 }
 
 export function hasAnyRole(user: User | null, roles: Role[]): boolean {
@@ -437,6 +467,15 @@ export function shortId(id: string | number | null | undefined): string {
 
 export function orderDisplayName(order: Order): string {
   return `Order ${shortId(order.id)}`;
+}
+
+/** The id to send when assigning a driver: the board returns driver_id. */
+export function boardDriverId(d: {
+  driver_id?: string | number;
+  id?: string | number;
+}): string {
+  const v = d.driver_id ?? d.id;
+  return v == null ? "" : String(v);
 }
 
 export function addressLine(a: DeliveryAddress | null | undefined): string {
