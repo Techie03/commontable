@@ -54,10 +54,22 @@ export type RestaurantStatus =
   | "suspended"
   | "demo";
 
+/** Address as the live API returns it: a nested object with a formatted
+ *  line. The flat string form stays supported for older payloads. */
+export interface RestaurantAddressObject {
+  id?: string | number;
+  line1?: string | null;
+  line2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postal_code?: string | null;
+  formatted?: string | null;
+}
+
 export interface RestaurantLocation {
-  id?: string;
+  id?: string | number;
   line1?: string;
-  address?: string;
+  address?: string | RestaurantAddressObject;
   city?: string;
   state?: string;
   postal_code?: string;
@@ -80,7 +92,7 @@ export interface Restaurant {
   maps_search_url?: string | null;
   locations?: RestaurantLocation[];
   location?: RestaurantLocation | null;
-  address?: string;
+  address?: string | RestaurantAddressObject;
 }
 
 export interface Modifier {
@@ -361,8 +373,15 @@ export function orderEvents(order: Order): StatusEvent[] {
   return order.status_events ?? order.timeline ?? [];
 }
 
+/** Short display form of an id. The live API returns integer ids, so a
+ *  bare .slice(0, 8) would throw; this coerces first. */
+export function shortId(id: string | number | null | undefined): string {
+  if (id == null) return "";
+  return String(id).slice(0, 8);
+}
+
 export function orderDisplayName(order: Order): string {
-  return `Order ${order.id.slice(0, 8)}`;
+  return `Order ${shortId(order.id)}`;
 }
 
 export function addressLine(a: DeliveryAddress | null | undefined): string {
@@ -374,12 +393,29 @@ export function addressLine(a: DeliveryAddress | null | undefined): string {
 }
 
 export function restaurantAddress(r: Restaurant): string {
+  const fromObject = (
+    a: RestaurantAddressObject | null | undefined
+  ): string => {
+    if (!a) return "";
+    if (a.formatted) return a.formatted;
+    return [a.line1, a.line2, a.city, a.state, a.postal_code]
+      .filter((p): p is string => typeof p === "string" && p.trim() !== "")
+      .join(", ");
+  };
+  if (typeof r.address === "string" && r.address) return r.address;
+  if (r.address && typeof r.address === "object") {
+    const built = fromObject(r.address);
+    if (built) return built;
+  }
   const loc = r.location ?? r.locations?.[0];
-  if (r.address) return r.address;
   if (!loc) return "";
-  const line = loc.line1 ?? loc.address ?? "";
+  if (loc.address && typeof loc.address === "object") {
+    return fromObject(loc.address);
+  }
+  const line =
+    loc.line1 ?? (typeof loc.address === "string" ? loc.address : "");
   return [line, loc.city, loc.state, loc.postal_code]
-    .filter((p) => p && p.trim() !== "")
+    .filter((p): p is string => typeof p === "string" && p.trim() !== "")
     .join(", ");
 }
 

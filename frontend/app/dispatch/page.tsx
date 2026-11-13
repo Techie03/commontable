@@ -17,7 +17,7 @@ import {
   wsUrl,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { addressLine, type DispatchBoard, type Order } from "@/lib/types";
+import { addressLine, shortId, type DispatchBoard, type Order } from "@/lib/types";
 
 export default function DispatchPage() {
   return (
@@ -175,7 +175,7 @@ function DispatchBoardView() {
               <li key={o.id} className="app-list-row app-order-row">
                 <div>
                   <span className="app-list-title">
-                    Order {o.id.slice(0, 8)} · <StatusBadge status={o.status} />
+                    Order {shortId(o.id)} · <StatusBadge status={o.status} />
                   </span>
                   <span className="app-list-sub">
                     {o.restaurant_name ?? "Restaurant"}
@@ -232,7 +232,7 @@ function DispatchBoardView() {
               <li key={o.id} className="app-list-row app-order-row">
                 <div>
                   <span className="app-list-title">
-                    Order {o.id.slice(0, 8)} · <StatusBadge status={o.status} />
+                    Order {shortId(o.id)} · <StatusBadge status={o.status} />
                   </span>
                   <span className="app-list-sub">
                     {o.restaurant_name ?? "Restaurant"}

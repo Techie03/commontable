@@ -37,6 +37,7 @@ import {
   orderDisplayName,
   orderFees,
   restaurantAddress,
+  shortId,
   type AdminMetrics,
   type LedgerEntry,
   type Order,
@@ -341,7 +342,7 @@ function AdminConsole() {
                       <td>
                         <Link href={`/order/${o.id}`}>{orderDisplayName(o)}</Link>
                       </td>
-                      <td>{o.restaurant_name ?? o.restaurant_id.slice(0, 8)}</td>
+                      <td>{o.restaurant_name ?? shortId(o.restaurant_id)}</td>
                       <td>{o.fulfillment_type === "pickup" ? "Pickup" : "Standard"}</td>
                       <td><StatusBadge status={o.status} /></td>
                       <td>{formatCents(orderFees(o).total_cents)}</td>
@@ -474,7 +475,7 @@ function AdminConsole() {
                     {normalizeRoles(u).map((r, idx) => (
                       <span key={`${r.role}-${idx}`} className="app-tag">
                         {r.role}
-                        {r.scope_id ? ` · ${r.scope_id.slice(0, 8)}` : ""}
+                        {r.scope_id ? ` · ${shortId(r.scope_id)}` : ""}
                       </span>
                     ))}
                   </span>
@@ -807,7 +808,7 @@ function AdminConsole() {
                 <li key={rule.id} className="app-list-row">
                   <span>
                     <strong>
-                      {rule.zone_name ?? rule.name ?? `Rule ${rule.id.slice(0, 8)}`}
+                      {rule.zone_name ?? rule.name ?? `Rule ${shortId(rule.id)}`}
                     </strong>
                     <span className="app-list-sub">
                       Delivery fee {formatCents(rule.standard_delivery_fee_cents)}
@@ -999,8 +1000,8 @@ function AdminConsole() {
                 <tbody>
                   {ledger.map((entry) => (
                     <tr key={entry.id}>
-                      <td>{entry.id.slice(0, 8)}</td>
-                      <td>{entry.order_id?.slice(0, 8) ?? "—"}</td>
+                      <td>{shortId(entry.id)}</td>
+                      <td>{shortId(entry.order_id) || "—"}</td>
                       <td>{entry.type}</td>
                       <td>{entry.direction}</td>
                       <td>{formatCents(entry.amount_cents)}</td>
@@ -1033,7 +1034,7 @@ function AdminConsole() {
                 <li key={s.id} className="app-list-row">
                   <span>
                     <strong>
-                      {s.restaurant_name ?? `Restaurant ${s.restaurant_id.slice(0, 8)}`}
+                      {s.restaurant_name ?? `Restaurant ${shortId(s.restaurant_id)}`}
                     </strong>
                     <span className="app-list-sub">
                       {s.period ?? ""} {s.status ? `· ${s.status}` : ""}
@@ -1061,8 +1062,8 @@ function AdminConsole() {
                   <span>
                     <strong>
                       {t.order_id
-                        ? `Order ${t.order_id.slice(0, 8)}`
-                        : `Ticket ${t.id.slice(0, 8)}`}
+                        ? `Order ${shortId(t.order_id)}`
+                        : `Ticket ${shortId(t.id)}`}
                     </strong>
                     <span className="app-list-sub">
                       {t.description ?? "No description"}

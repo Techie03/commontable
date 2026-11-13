@@ -27,6 +27,7 @@ import { useAuth } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
 import {
   asList,
+  shortId,
   taskId,
   type DeliveryTask,
   type DriverProfile,
@@ -351,7 +352,7 @@ function DriverWorkspace() {
         <section className="app-card" aria-label="Active delivery">
           <h2>Active delivery</h2>
           <p>
-            <strong>Order {activeTask.order_id.slice(0, 8)}</strong>
+            <strong>Order {shortId(activeTask.order_id)}</strong>
             {activeTask.restaurant_name
               ? ` · ${activeTask.restaurant_name}`
               : ""}
@@ -436,7 +437,7 @@ function DriverWorkspace() {
               <li key={taskId(task)} className="app-list-row app-offer-row">
                 <div>
                   <span className="app-list-title">
-                    Order {task.order_id.slice(0, 8)}
+                    Order {shortId(task.order_id)}
                     {task.restaurant_name ? ` · ${task.restaurant_name}` : ""}
                   </span>
                   <span className="app-list-sub">
@@ -518,7 +519,7 @@ function DriverWorkspace() {
                     className="app-list-row"
                   >
                     <span>
-                      <strong>Order {entry.order_id.slice(0, 8)}</strong>
+                      <strong>Order {shortId(entry.order_id)}</strong>
                       <span className="app-list-sub">
                         {(entry.delivered_at ?? entry.created_at)
                           ? new Date(

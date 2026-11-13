@@ -120,7 +120,7 @@ function OrderFlow() {
     if (draft.restaurantId) {
       listRestaurants(draft.address.postal_code || undefined)
         .then((all) => {
-          const found = all.find((r) => r.id === draft.restaurantId);
+          const found = all.find((r) => String(r.id) === String(draft.restaurantId));
           if (found && found.status !== "prospect") setSelected(found);
         })
         .catch(() => undefined);

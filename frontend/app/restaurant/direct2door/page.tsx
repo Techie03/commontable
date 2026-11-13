@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
 import type { MenuItem, Order, Restaurant } from "@/lib/types";
+import { shortId } from "@/lib/types";
 
 const MANUAL_ID_KEY = "commontable.restaurant_manual_id";
 const ESTIMATED_STANDARD_FEE_CENTS = 399;
@@ -207,7 +208,7 @@ function Direct2DoorForm() {
 
       {placed && (
         <p className="app-notice app-notice-good" role="status">
-          Order {placed.id.slice(0, 8)} recorded and placed. It is now in the{" "}
+          Order {shortId(placed.id)} recorded and placed. It is now in the{" "}
           <Link href="/restaurant">order queue</Link>.
         </p>
       )}
