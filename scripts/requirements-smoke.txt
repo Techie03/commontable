@@ -1,0 +1,4 @@
+# Dependencies for scripts/e2e_smoke.py (the CommonTable MVP smoke test).
+# Install with: pip install -r requirements-smoke.txt
+httpx>=0.27,<1
+websockets>=13,<16

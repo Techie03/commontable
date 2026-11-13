@@ -1,21 +1,28 @@
-"""Alembic environment. URL comes from DATABASE_URL (env), never hardcoded."""
+"""Alembic environment. URL comes from DATABASE_URL (env), never hardcoded.
+
+Migrations target PostgreSQL + PostGIS. Tests run on SQLite via
+create_all and never run Alembic.
+"""
 
 import os
+import sys
 from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
+
+# Make `app` importable when alembic runs from backend/.
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# Import Base and all models here once they exist so autogenerate sees them:
-#   from app.db.session import Base
-#   from app import models  # noqa: F401
-#   target_metadata = Base.metadata
-target_metadata = None
+from app.db.session import Base  # noqa: E402
+from app import models  # noqa: E402,F401  (import registers all tables)
+
+target_metadata = Base.metadata
 
 config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
 
