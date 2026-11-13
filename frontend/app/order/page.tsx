@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import ApiOffline from "@/components/ApiOffline";
 import FeeBreakdown from "@/components/FeeBreakdown";
-import { ApiError, checkServiceability, createPaymentIntent, getMenu, listRestaurants, placeOrder } from "@/lib/api";
+import { ApiError, checkServiceability, createPaymentIntent, getMenu, listComingSoonRestaurants, listRestaurants, placeOrder } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
 import {
@@ -97,6 +97,9 @@ function OrderFlow() {
   const [checking, setChecking] = useState(false);
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loadingRestaurants, setLoadingRestaurants] = useState(false);
+  const [comingSoon, setComingSoon] = useState<Restaurant[]>([]);
+  const [comingSoonTotal, setComingSoonTotal] = useState(0);
+  const [showAllComingSoon, setShowAllComingSoon] = useState(false);
   const [selected, setSelected] = useState<Restaurant | null>(null);
   const [menu, setMenu] = useState<MenuItem[]>([]);
   const [loadingMenu, setLoadingMenu] = useState(false);
@@ -166,11 +169,17 @@ function OrderFlow() {
   const loadRestaurants = useCallback(async (postalCode: string) => {
     setLoadingRestaurants(true);
     setError(null);
+    setShowAllComingSoon(false);
     try {
       const all = await listRestaurants(postalCode);
       // Prospects are never orderable. The API must not return them here;
       // filter defensively so a prospect can never reach the customer.
       setRestaurants(all.filter((r) => r.status !== "prospect"));
+      // Coming soon: real Denton restaurants that have not joined yet.
+      // Read-only directory, never orderable.
+      const soon = await listComingSoonRestaurants(postalCode);
+      setComingSoon(soon.items);
+      setComingSoonTotal(soon.total);
     } catch (err) {
       handleApiError(err);
     } finally {
@@ -474,6 +483,47 @@ function OrderFlow() {
         </section>
       )}
 
+      {/* Coming soon: real Denton restaurants, not yet partners */}
+      {service?.serviceable && comingSoonTotal > 0 && (
+        <section className="app-card" aria-label="Restaurants coming soon">
+          <h2>Coming soon in Denton</h2>
+          <p className="app-lede">
+            {comingSoonTotal} local restaurant{comingSoonTotal === 1 ? "" : "s"}{" "}
+            near {address.postal_code.trim()} {comingSoonTotal === 1 ? "has" : "have"}{" "}
+            not joined CommonTable yet. Ordering opens as each one comes on
+            board.
+          </p>
+          <ul className="app-list">
+            {(showAllComingSoon ? comingSoon : comingSoon.slice(0, 12)).map((r) => (
+              <li key={r.id} className="app-list-row">
+                <span>
+                  <span className="app-list-title">
+                    {r.name}
+                    <span className="app-tag app-tag-muted">Coming soon</span>
+                  </span>
+                  <span className="app-list-sub">
+                    {[r.primary_category, restaurantAddress(r), r.phone]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          {comingSoonTotal > 12 && (
+            <button
+              type="button"
+              className="app-btn app-btn-small app-btn-ghost"
+              onClick={() => setShowAllComingSoon((v) => !v)}
+            >
+              {showAllComingSoon
+                ? "Show fewer"
+                : `Show all ${comingSoonTotal} coming soon`}
+            </button>
+          )}
+        </section>
+      )}
+
       {/* Step 3: menu + cart */}
       {selected && (
         <section className="app-card" aria-label="Menu">
@@ -486,6 +536,14 @@ function OrderFlow() {
             <ul className="app-list">
               {menu.map((item) => (
                 <li key={item.id} className="app-list-row app-menu-row">
+                  {item.image_url && (
+                    <img
+                      src={item.image_url}
+                      alt=""
+                      className="app-menu-image"
+                      loading="lazy"
+                    />
+                  )}
                   <div className="app-menu-info">
                     <span className="app-list-title">{item.name}</span>
                     {item.description && (

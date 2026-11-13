@@ -60,13 +60,14 @@ PRICING_DEFAULTS = {
 RESTAURANT_NAME = "Demo Diner (Denton Pilot)"
 
 MENU_ITEMS = [
-    # name, description, price_cents, category, available
-    ("Margherita Pizza", "Demo item: tomato, mozzarella, basil.", 1080, "Mains", True),
-    ("Demo Burger", "Demo item: beef patty, lettuce, tomato, bun.", 1099, "Mains", True),
-    ("Garden Salad", "Demo item: mixed greens, cucumber, dressing.", 899, "Salads", True),
-    ("Chicken Sandwich", "Demo item: grilled chicken, mayo, bun.", 1199, "Mains", True),
-    ("Fries", "Demo item: golden fries with salt.", 399, "Sides", True),
-    ("Iced Tea", "Demo item: brewed iced tea.", 299, "Drinks", False),  # unavailable
+    # name, description, price_cents, category, available, image_url
+    # Images live in frontend/public/menu/ (served from the site root).
+    ("Margherita Pizza", "Demo item: tomato, mozzarella, basil.", 1080, "Mains", True, "/menu/margherita-pizza.jpg"),
+    ("Demo Burger", "Demo item: beef patty, lettuce, tomato, bun.", 1099, "Mains", True, "/menu/demo-burger.jpg"),
+    ("Garden Salad", "Demo item: mixed greens, cucumber, dressing.", 899, "Salads", True, "/menu/garden-salad.jpg"),
+    ("Chicken Sandwich", "Demo item: grilled chicken, mayo, bun.", 1199, "Mains", True, "/menu/chicken-sandwich.jpg"),
+    ("Fries", "Demo item: golden fries with salt.", 399, "Sides", True, "/menu/fries.jpg"),
+    ("Iced Tea", "Demo item: brewed iced tea.", 299, "Drinks", False, "/menu/iced-tea.jpg"),  # unavailable
 ]
 
 DEMO_USERS = [
@@ -184,7 +185,7 @@ def seed_restaurant(db, zone: ServiceZone) -> Restaurant:
         db.add(menu)
         db.flush()
 
-    for name, description, price_cents, category, available in MENU_ITEMS:
+    for name, description, price_cents, category, available, image_url in MENU_ITEMS:
         item = (
             db.query(MenuItem)
             .filter(MenuItem.menu_id == menu.id, MenuItem.name == name)
@@ -199,8 +200,12 @@ def seed_restaurant(db, zone: ServiceZone) -> Restaurant:
                     price_cents=price_cents,
                     category=category,
                     available=available,
+                    image_url=image_url,
                 )
             )
+        elif not item.image_url:
+            # Backfill images on items seeded before image_url existed.
+            item.image_url = image_url
     db.flush()
     return restaurant
 

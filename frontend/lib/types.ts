@@ -116,6 +116,7 @@ export interface MenuItem {
   price_cents: number;
   category?: string;
   available: boolean;
+  image_url?: string | null;
   modifiers?: Modifier[];
 }
 

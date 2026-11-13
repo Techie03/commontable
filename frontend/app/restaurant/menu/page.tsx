@@ -363,6 +363,14 @@ function MenuManager() {
                   </div>
                 ) : (
                   <>
+                    {item.image_url && (
+                      <img
+                        src={item.image_url}
+                        alt=""
+                        className="app-menu-image"
+                        loading="lazy"
+                      />
+                    )}
                     <div className="app-menu-info">
                       <span className="app-list-title">{item.name}</span>
                       {item.description && (

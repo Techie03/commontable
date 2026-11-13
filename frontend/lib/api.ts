@@ -288,6 +288,21 @@ export function listRestaurants(postalCode?: string): Promise<Restaurant[]> {
   ).then((r) => (Array.isArray(r) ? r : r.items ?? []));
 }
 
+export function listComingSoonRestaurants(
+  postalCode?: string,
+  page = 1,
+  pageSize = 100
+): Promise<{ items: Restaurant[]; total: number }> {
+  const params = new URLSearchParams({
+    page: String(page),
+    page_size: String(pageSize),
+  });
+  if (postalCode) params.set("postal_code", postalCode);
+  return get<Paginated<Restaurant>>(
+    `/api/v1/restaurants/coming-soon?${params.toString()}`
+  ).then((r) => ({ items: r.items ?? [], total: r.total ?? 0 }));
+}
+
 export function getRestaurant(id: string): Promise<Restaurant> {
   return get<Restaurant>(`/api/v1/restaurants/${id}`);
 }

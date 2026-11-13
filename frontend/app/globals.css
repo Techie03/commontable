@@ -2510,6 +2510,14 @@ select.app-input {
   flex: 1 1 12rem;
 }
 
+.app-menu-image {
+  width: 4.5rem;
+  height: 4.5rem;
+  object-fit: cover;
+  border-radius: 0.5rem;
+  flex-shrink: 0;
+}
+
 .app-menu-price {
   font-weight: 700;
   color: var(--forest);

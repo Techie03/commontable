@@ -21,6 +21,7 @@ from app.models.payments import ENTRY_RESTAURANT_PAYABLE, LedgerEntry
 from app.models.restaurants import (
     PUBLIC_STATUSES,
     STATUS_PENDING,
+    STATUS_PROSPECT,
     Menu,
     MenuItem,
     Modifier,
@@ -81,6 +82,46 @@ def list_restaurants(
             for r in restaurants
             if any(
                 set(loc.service_zone_ids or []) & zone_ids for loc in r.locations
+            )
+        ]
+    total = len(restaurants)
+    sliced = restaurants[(page - 1) * page_size : page * page_size]
+    return {
+        "items": [restaurant_to_out(r) for r in sliced],
+        "page": page,
+        "page_size": page_size,
+        "total": total,
+    }
+
+
+@router.get("/coming-soon", response_model=dict)
+def list_coming_soon(
+    postal_code: str | None = None,
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    """Public directory of prospect (census, unclaimed) restaurants.
+
+    Read-only discovery only: these restaurants have NOT joined
+    CommonTable and are NOT orderable. They are listed as coming soon,
+    never presented as partners. Must stay above the /{restaurant_id}
+    route or FastAPI matches "coming-soon" as an id.
+    """
+    restaurants = (
+        db.query(Restaurant)
+        .filter(Restaurant.status == STATUS_PROSPECT)
+        .order_by(Restaurant.name)
+        .all()
+    )
+    if postal_code is not None:
+        restaurants = [
+            r
+            for r in restaurants
+            if any(
+                loc.address is not None
+                and loc.address.postal_code == postal_code
+                for loc in r.locations
             )
         ]
     total = len(restaurants)
