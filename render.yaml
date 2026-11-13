@@ -9,10 +9,11 @@
 # time: DATABASE_URL is the Supabase session-pooler connection string,
 # JWT_SECRET_KEY is a long random secret (generate one, never reuse).
 #
-# The start command runs migrations, the demo seed, and the Denton census
-# import before starting uvicorn. All three are idempotent, so re-running
-# them on every start (including wakes from sleep) is safe; this is
-# deliberate for the free tier, where pre-deploy hooks are not relied on.
+# The start command runs migrations, the seed, the Denton census import,
+# the pilot menu import, and the pilot menu image step before starting
+# uvicorn. All five are idempotent, so re-running them on every start
+# (including wakes from sleep) is safe; this is deliberate for the free
+# tier, where pre-deploy hooks are not relied on.
 
 services:
   - type: web
@@ -22,7 +23,7 @@ services:
     region: virginia
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: alembic upgrade head && python scripts/seed.py && python scripts/import_denton_restaurants.py && exec uvicorn main:app --host 0.0.0.0 --port $PORT
+    startCommand: alembic upgrade head && python scripts/seed.py && python scripts/import_denton_restaurants.py && python scripts/import_pilot_menus.py && python scripts/apply_pilot_menu_images.py && exec uvicorn main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
       - key: APP_ENV

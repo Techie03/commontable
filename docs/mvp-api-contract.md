@@ -66,9 +66,10 @@ PLACED → ACCEPTED → PREPARING → READY → ASSIGNED → PICKED_UP → DELIV
 ### Restaurants and menus
 | Method & path | Role | Notes |
 |---|---|---|
-| `GET /api/v1/restaurants?zone_id=&postal_code=` | public | Only **active** and **demo** restaurants serving the zone/postal code. Prospect (census, unclaimed) restaurants are NEVER listed here and are never orderable. |
-| `GET /api/v1/restaurants/{id}` | public | Detail incl. location + hours. Returns 404 for prospect restaurants. |
-| `GET /api/v1/restaurants/{id}/menu` | public | Items + modifiers + availability. |
+| `GET /api/v1/restaurants?zone_id=&postal_code=` | public | Only **active** restaurants serving the zone/postal code. Demo restaurants are internal test data, never listed. Prospect (census, unclaimed) restaurants are NEVER listed here and are never orderable. |
+| `GET /api/v1/restaurants/{id}` | public + staff of it | Detail incl. location + hours. Customers see active restaurants only; staff scoped to a restaurant (and admins) also see theirs whatever its status. Returns 404 for prospect restaurants. |
+| `GET /api/v1/restaurants/{id}/menu` | public + staff of it | Items + modifiers + availability. Same visibility as detail: active for customers, plus own-restaurant for scoped staff. |
+| `GET /api/v1/restaurants/{id}/browse-menu` | public | Browse-only menu for a **prospect** restaurant (pilot menus collected from the restaurant's own published menu). Returns `browse_only: true`. 404 for any non-prospect. Items with `price_cents` 0 have no published price; the UI shows "Price not listed". Nothing here is orderable: `place_order` rejects non-orderable statuses. |
 | `GET /api/v1/admin/restaurants?status=` | admin | All restaurants incl. prospects, filterable by status. |
 | `POST /api/v1/restaurants` | owner, admin | Creates a `pending` restaurant. |
 | `PATCH /api/v1/restaurants/{id}` | owner/manager of it, admin | |
@@ -217,9 +218,15 @@ Tables: `users`, `roles`, `user_roles`, `customers`, `restaurants`,
 `prospect`, `pending`, `active`, `suspended`, `demo`.
 - `prospect`: a real Denton restaurant found by the Google Maps census.
   Unclaimed, not onboarded, NOT orderable, never presented as a partner.
-- `demo`: the single orderable demo restaurant for the slice (see §8).
+- `demo`: internal test restaurant for the slice (see §8). Invisible to
+  customers everywhere: never listed, detail/menu 404 anonymously.
+  Staff scoped to it (and admins) can still open its dashboard/menu.
 - `pending` / `active` / `suspended`: as in the spec.
-Only `active` and `demo` restaurants are visible to customers (§3).
+Only `active` restaurants are visible to customers (§3). Orders may be
+placed against `active` and `demo` statuses only (`ORDERABLE_STATUSES`);
+prospects are never orderable. Prospect restaurants with a collected
+pilot menu expose it read-only via browse-menu, and the coming-soon
+list carries a `has_menu` flag per restaurant.
 `restaurants` carries `place_id` (unique, nullable — Google Maps place id,
 the census upsert key), `source` (`census`, `seed`, or `manual`), and
 census fields `primary_category`, `price_level`, `rating_avg`,

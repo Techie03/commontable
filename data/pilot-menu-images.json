@@ -1,0 +1,550 @@
+{
+  "generated": "2026-11-13",
+  "note": "One photo per pilot menu item. Commons photos are Public Domain or CC0, hotlinked from upload.wikimedia.org. needs_generation items have no suitable Commons photo.",
+  "images": {
+    "763536474979077": {
+      "Egg Rolls": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Egg_rolls.PNG",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Egg%20rolls.PNG?width=800"
+      },
+      "Crab Rangoon": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:CrabRangoon.jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/CrabRangoon.jpg?width=800"
+      },
+      "Chicken Satay": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Chicken_satay_(NYC)_May_2023.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Chicken%20satay%20%28NYC%29%20May%202023.jpg?width=800"
+      },
+      "Tom Yum Soup": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Tom_Yum_Soup.JPG",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tom%20Yum%20Soup.JPG?width=800"
+      },
+      "Tom Kha Soup": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Tom_Kha_(Coconut_Soup)_with_prawns_-_Little_Thai,_Brighton_2024-03-21.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tom%20Kha%20%28Coconut%20Soup%29%20with%20prawns%20-%20Little%20Thai%2C%20Brighton%202024-03-21.jpg?width=800"
+      },
+      "Thai Ocha Salad": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Som%20Tom%20%28Papaya%20Salad%29%20-%20Little%20Thai%202024-06-14.jpg?width=800",
+        "source": "commons",
+        "license": "CC0",
+        "file_page": "https://commons.wikimedia.org/wiki/File:Som_Tom_(Papaya_Salad)_-_Little_Thai_2024-06-14.jpg"
+      },
+      "Ka Prao": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Ka-phrao_mu_(basil_fried_minced_pork)_with_rice_%26_egg,_Bangkok,_2017-11-07_(2).jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ka-phrao%20mu%20%28basil%20fried%20minced%20pork%29%20with%20rice%20%26%20egg%2C%20Bangkok%2C%202017-11-07%20%282%29.jpg?width=800"
+      },
+      "Ocha Garden": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Black_pan_with_stir-fried_vegetables_(broccoli,_onion,_red_pepper).jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Black%20pan%20with%20stir-fried%20vegetables%20%28broccoli%2C%20onion%2C%20red%20pepper%29.jpg?width=800"
+      },
+      "Pad Thai Rice Noodles": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Pad_Thai_2018-04-19.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pad%20Thai%202018-04-19.jpg?width=800"
+      },
+      "Pad See Ew Noodles": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Pad_See_Ew_-_Massachusetts.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pad%20See%20Ew%20-%20Massachusetts.jpg?width=800"
+      },
+      "Pineapple Cashew Fried Rice": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Pineapple_Fried_Rice_with_Duck_-_Thai_Pad_Thai_2025-07-09.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pineapple%20Fried%20Rice%20with%20Duck%20-%20Thai%20Pad%20Thai%202025-07-09.jpg?width=800"
+      },
+      "Green Curry": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Beef_green_curry_-_Chiang_Mai_-_2017-07-08_(001).jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Beef%20green%20curry%20-%20Chiang%20Mai%20-%202017-07-08%20%28001%29.jpg?width=800"
+      },
+      "Orange Chicken": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Orange_Chicken_-_Thai_Pad_Thai_2025-12-03.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Orange%20Chicken%20-%20Thai%20Pad%20Thai%202025-12-03.jpg?width=800"
+      },
+      "Thai Ocha Hot Plate": {
+        "prompt": "overhead photo of sizzling mixed seafood stir-fry with shrimp, squid, mushrooms, carrots, celery, cashew nuts and onions in a glossy chili sauce on a hot plate, Thai restaurant food photography",
+        "source": "needs_generation",
+        "url": null
+      },
+      "Fried Banana with Ice Cream": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Deep_fried_banana_dessert_at_Rice_and_Noodles_Thai_Restaurant.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Deep%20fried%20banana%20dessert%20at%20Rice%20and%20Noodles%20Thai%20Restaurant.jpg?width=800"
+      }
+    },
+    "482509130739511": {
+      "Veg Clear Soup": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Bulion_Warzywny_-_1.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Bulion_Warzywny_-_1.jpg"
+      },
+      "Paneer 65": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Homemade_Paneer_65.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Homemade_Paneer_65.jpg/960px-Homemade_Paneer_65.jpg"
+      },
+      "Chicken 65": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:CHICKEN_65_-_Mini_Madras_2026-05-14.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/CHICKEN_65_-_Mini_Madras_2026-05-14.jpg/960px-CHICKEN_65_-_Mini_Madras_2026-05-14.jpg"
+      },
+      "Chef’s Spl Haleem": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Haleem.JPG",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Haleem.JPG/960px-Haleem.JPG"
+      },
+      "Tandoori Chicken": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Tandoori_Chicken_1.JPG",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Tandoori_Chicken_1.JPG/960px-Tandoori_Chicken_1.JPG"
+      },
+      "Paneer Butter Masala": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Butter_Naan_With_Paneer_Butter_Masala.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Butter_Naan_With_Paneer_Butter_Masala.jpg/960px-Butter_Naan_With_Paneer_Butter_Masala.jpg"
+      },
+      "Chicken Tikka Masala": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Chicken_Tikka_Masala_1.JPG",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Chicken_Tikka_Masala_1.JPG/960px-Chicken_Tikka_Masala_1.JPG"
+      },
+      "Namaste Special Goat Curry": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Mutton_curry_photographed_in_West_Bengal,_India,_January_28,_2024.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Mutton_curry_photographed_in_West_Bengal%2C_India%2C_January_28%2C_2024.jpg/960px-Mutton_curry_photographed_in_West_Bengal%2C_India%2C_January_28%2C_2024.jpg"
+      },
+      "Hyderabadi Chicken Dum Biryani": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Hyderabadi_Dum_Ki_Biryani.JPG",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/da/Hyderabadi_Dum_Ki_Biryani.JPG/960px-Hyderabadi_Dum_Ki_Biryani.JPG"
+      },
+      "Namaste Chicken Biryani (Boneless)": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Chicken_Biryani_3.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Chicken_Biryani_3.jpg/960px-Chicken_Biryani_3.jpg"
+      },
+      "Namaste Special Fried Rice": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Wok_fried_rice_with_chicken_%26_dried_shrimp_-_Pho_2025-07-25.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Wok_fried_rice_with_chicken_%26_dried_shrimp_-_Pho_2025-07-25.jpg/960px-Wok_fried_rice_with_chicken_%26_dried_shrimp_-_Pho_2025-07-25.jpg"
+      },
+      "Steamed Chicken MoMos": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:%22%E3%83%A2%E3%83%A2%22_at_Indian_restaurant_in_Tsukuba,_a_kind_of_dumpling_containing_spiced_meat.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/%22%E3%83%A2%E3%83%A2%22_at_Indian_restaurant_in_Tsukuba%2C_a_kind_of_dumpling_containing_spiced_meat.jpg/960px-%22%E3%83%A2%E3%83%A2%22_at_Indian_restaurant_in_Tsukuba%2C_a_kind_of_dumpling_containing_spiced_meat.jpg"
+      },
+      "Garlic Butter Naan": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Plain_Naan_-_Gurkha_Kitchen_2025-10-17.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Plain_Naan_-_Gurkha_Kitchen_2025-10-17.jpg/960px-Plain_Naan_-_Gurkha_Kitchen_2025-10-17.jpg"
+      },
+      "Rasamalai": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Ras_Malai.JPG",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Ras_Malai.JPG/960px-Ras_Malai.JPG"
+      },
+      "Mango Lassi": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Mango_Lassi_and_Butter_Milk_-_Vel_South_Indian_Kitchen_%2B_Bar.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Mango_Lassi_and_Butter_Milk_-_Vel_South_Indian_Kitchen_%2B_Bar.jpg/960px-Mango_Lassi_and_Butter_Milk_-_Vel_South_Indian_Kitchen_%2B_Bar.jpg"
+      }
+    },
+    "736091477647825": {
+      "Mozzarella Sticks": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Mozzarella_394.jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://upload.wikimedia.org/wikipedia/commons/6/64/Mozzarella_394.jpg"
+      },
+      "Fries": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:BK-French-Fries.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/BK-French-Fries.jpg?width=800"
+      },
+      "Side Caesar": {
+        "prompt": "overhead photo of a small Caesar salad with romaine lettuce, shaved parmesan, croutons and red onion in a white bowl, restaurant food photography",
+        "source": "needs_generation",
+        "url": null
+      },
+      "Small 12\"": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:PizzaMargherita.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/PizzaMargherita.jpg?width=800"
+      },
+      "Medium 14\"": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:PizzaMargherita.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/PizzaMargherita.jpg?width=800"
+      },
+      "Large 16\"": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:PizzaMargherita.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/PizzaMargherita.jpg?width=800"
+      },
+      "*NEW* Cacio e Pizza": {
+        "prompt": "overhead photo of a white cheese pizza with melted mozzarella, cracked black pepper and shaved parmesan on a wooden board, restaurant food photography",
+        "source": "needs_generation",
+        "url": null
+      },
+      "Supreme": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Supreme_pizza.jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Supreme%20pizza.jpg?width=800"
+      },
+      "Pepperoni Lovers": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Salami-pizza-close.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Salami-pizza-close.jpg?width=800"
+      },
+      "Buffalo Chicken": {
+        "prompt": "overhead photo of a buffalo chicken pizza with orange buffalo sauce drizzle, grilled chicken and melted mozzarella on a wooden board, restaurant food photography",
+        "source": "needs_generation",
+        "url": null
+      },
+      "Pizza Mozzarella": {
+        "prompt": "overhead photo of a white pizza with melted mozzarella, garlic and olive oil, no tomato sauce, on a wooden board, restaurant food photography",
+        "source": "needs_generation",
+        "url": null
+      },
+      "Buffalo Chicken Sub": {
+        "prompt": "photo of a buffalo chicken sub sandwich with grilled chicken, melted American cheese and orange buffalo sauce on a toasted sub roll, restaurant food photography",
+        "source": "needs_generation",
+        "url": null
+      },
+      "Italian Sub": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:QuiznosSub.jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/QuiznosSub.jpg?width=800"
+      },
+      "Buffalo Chicken Stromboli": {
+        "prompt": "photo of a golden folded stromboli turnover sliced open showing buffalo chicken and melted mozzarella, marinara sauce on the side, restaurant food photography",
+        "source": "needs_generation",
+        "url": null
+      },
+      "Cannoli": {
+        "prompt": "photo of a single large cannoli dusted with powdered sugar on a small white plate, Italian bakery food photography",
+        "source": "needs_generation",
+        "url": null
+      }
+    },
+    "26368235492833703": {
+      "Birria Queso": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Queso.jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Queso.jpg?width=800"
+      },
+      "Ay Guacamole!": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Guacamole_in_a_bowl_by_Jon_Sullivan_(4_April_2004).jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Guacamole_in_a_bowl_by_Jon_Sullivan_%284_April_2004%29.jpg?width=800"
+      },
+      "Chicken Taquitos": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Flautas_guacamole_tortillas.jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Flautas_guacamole_tortillas.jpg?width=800"
+      },
+      "Birria Chilaquiles": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Valley_-_September_2024_Sarah_Stierch_06.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Valley%20-%20September%202024%20Sarah%20Stierch%2006.jpg?width=800"
+      },
+      "Huevos Rancheros": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Huevos_rancheros_-_Pasadena,_CA.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Huevos%20rancheros%20-%20Pasadena%2C%20CA.jpg?width=800"
+      },
+      "Quesabirria Tacos with Consome": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Tacos_de_Birria_with_consom%C3%A9_and_Agua_Fresca.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tacos_de_Birria_with_consom%C3%A9_and_Agua_Fresca.jpg?width=800"
+      },
+      "La Poblana Burger": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Cheeseburger%202.jpg?width=800",
+        "source": "commons",
+        "license": "CC0",
+        "file_page": "https://commons.wikimedia.org/wiki/File:Cheeseburger_2.jpg"
+      },
+      "Burrito Feliz": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Burrito.JPG",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Burrito.JPG?width=800"
+      },
+      "Mama Lupita's Enmoladas": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Enchiladas_de_mole.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Enchiladas_de_mole.jpg?width=800"
+      },
+      "Mega Torta": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Tortamex.jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tortamex.jpg?width=800"
+      },
+      "Chicken": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Tacos_in_Shimoda_2.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tacos_in_Shimoda_2.jpg?width=800"
+      },
+      "QuesaShrimp": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Shrimp_tacos.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Shrimp_tacos.jpg?width=800"
+      },
+      "Salmon Boka Salad": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Salmon_Fillet_Salad_-_Jonny%27s_2026-06-12.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Salmon%20Fillet%20Salad%20-%20Jonny%27s%202026-06-12.jpg?width=800"
+      },
+      "Shrimp Cocktail": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Shrimp_cocktail_with_greens_-_Massachusetts.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Shrimp_cocktail_with_greens_-_Massachusetts.jpg?width=800"
+      },
+      "Cinnamon Sugar Churros": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Churros_-_September_2024_-_Sarah_Stierch.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Churros%20-%20September%202024%20-%20Sarah%20Stierch.jpg?width=800"
+      }
+    },
+    "1752070358462338": {
+      "Brisket Queso": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Tortilla_chips_and_queso.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tortilla%20chips%20and%20queso.jpg?width=800"
+      },
+      "Chips & Guacamole": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Chips,_guacamole,_and_salsa_-_Massachusetts.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Chips%2C%20guacamole%2C%20and%20salsa%20-%20Massachusetts.jpg?width=800"
+      },
+      "Texas Chili": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Chili_con_carne_and_cheddar_cheese_-_Arlington,_MA.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Chili%20con%20carne%20and%20cheddar%20cheese%20-%20Arlington%2C%20MA.jpg?width=800"
+      },
+      "Waylon": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Cheeseburger.jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Cheeseburger.jpg?width=800"
+      },
+      "Georgie Boy": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Bacon_cheeseburger,_French_fries,_and_dill_pickle_-_Massachusetts.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Bacon%20cheeseburger%2C%20French%20fries%2C%20and%20dill%20pickle%20-%20Massachusetts.jpg?width=800"
+      },
+      "Stevie": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Bacon_cheeseburger_with_fries_-_Whately_Diner_-_Whately,_MA.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Bacon%20cheeseburger%20with%20fries%20-%20Whately%20Diner%20-%20Whately%2C%20MA.jpg?width=800"
+      },
+      "Double Trouble": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Burger_King_double_cheeseburger.jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Burger%20King%20double%20cheeseburger.jpg?width=800"
+      },
+      "Ready Freddie": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:BBQ_Cheddar_-_Smashburger,_Brighton_2023-11-18.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/BBQ%20Cheddar%20-%20Smashburger%2C%20Brighton%202023-11-18.jpg?width=800"
+      },
+      "Turkey Bob": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Hamburger_tasty.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Hamburger%20tasty.jpg?width=800"
+      },
+      "Chicks-en Sandwich": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Fried_chicken_burger_.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Fried%20chicken%20burger%20.jpg?width=800"
+      },
+      "Chicken Tenders": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Basket_of_Slim_Chickens_tenders_and_french_fries,_with_sauce.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Basket%20of%20Slim%20Chickens%20tenders%20and%20french%20fries%2C%20with%20sauce.jpg?width=800"
+      },
+      "Garlic Parmesan": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:French_fries_%F0%9F%8D%9F.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/French%20fries%20%F0%9F%8D%9F.jpg?width=800"
+      },
+      "House Salad": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Garden_salad_-_San_Francisco.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Garden%20salad%20-%20San%20Francisco.jpg?width=800"
+      },
+      "Willies Stash": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Little_River_Inn_Restaurant_-_March_2025_-_Sarah_Stierch_06.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Little%20River%20Inn%20Restaurant%20-%20March%202025%20-%20Sarah%20Stierch%2006.jpg?width=800"
+      },
+      "Coca-Cola": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Glass_cola.jpg",
+        "license": "Public domain",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Glass%20cola.jpg?width=800"
+      }
+    },
+    "1059334171419652": {
+      "Smoked Mac n' Cheese": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Macaroni_cheese_-_The_Kew_Greenhouse_Cafe_2025-05-14.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Macaroni%20cheese%20-%20The%20Kew%20Greenhouse%20Cafe%202025-05-14.jpg?width=800"
+      },
+      "Slaw No.3": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Coleslaw_de_chou_rouge_aux_graines_de_tournesol.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Coleslaw%20de%20chou%20rouge%20aux%20graines%20de%20tournesol.jpg?width=800"
+      },
+      "Gumbo": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Gumbo_and_Old_News.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Gumbo%20and%20Old%20News.jpg?width=800"
+      },
+      "Loaded Mac": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Mac_and_cheese_-_Morelli_Zorelli_2024-08-29.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Mac%20and%20cheese%20-%20Morelli%20Zorelli%202024-08-29.jpg?width=800"
+      },
+      "Brisket Sandwich": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Brisket_CRUNCH_-_Crunch%26Co_2024-04-16.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Brisket%20CRUNCH%20-%20Crunch%26Co%202024-04-16.jpg?width=800"
+      },
+      "Pulled Pork Sandwich": {
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pulled%20pork%20sandwich%20with%20Kansas%20City%20barbecue%20sauce%20and%20mustard%20-%20Massachusetts.jpg?width=800",
+        "source": "commons",
+        "license": "CC0",
+        "file_page": "https://commons.wikimedia.org/wiki/File:Pulled_pork_sandwich_with_Kansas_City_barbecue_sauce_and_mustard_-_Massachusetts.jpg"
+      },
+      "Mojica": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:The_Bacon,_Mac_%27n%27_Cheese_One_-_Brand_Sixteen_2024-03-08.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/The%20Bacon%2C%20Mac%20%27n%27%20Cheese%20One%20-%20Brand%20Sixteen%202024-03-08.jpg?width=800"
+      },
+      "Smoky Mountain": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Pulled-pork-sandwiches.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pulled-pork-sandwiches.jpg?width=800"
+      },
+      "Build a spud": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Baked_potato_with_baked_beans_and_cheese_-_The_Verandah_2026-08-25.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Baked%20potato%20with%20baked%20beans%20and%20cheese%20-%20The%20Verandah%202026-08-25.jpg?width=800"
+      },
+      "da'Hutch": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Jacket_potato_with_meatballs_tomato_sauce_and_cheese_and_butter_-_Potatoast_2026-05-02.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Jacket%20potato%20with%20meatballs%20tomato%20sauce%20and%20cheese%20and%20butter%20-%20Potatoast%202026-05-02.jpg?width=800"
+      },
+      "Taco Plate": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Tacos_in_a_soft_tortilla_4.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Tacos%20in%20a%20soft%20tortilla%204.jpg?width=800"
+      },
+      "Whole Pig Plate": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:A_plate_of_Texas_barbecue_served_at_Goldee%E2%80%99s_Barbecue_in_Fort_Worth,_Texas.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/A%20plate%20of%20Texas%20barbecue%20served%20at%20Goldee%E2%80%99s%20Barbecue%20in%20Fort%20Worth%2C%20Texas.jpg?width=800"
+      },
+      "Half Pig Plate": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Pulled_pork,_jalapeno_sausage,_collard_greens,_and_baked_beans_-_Cambridge,_MA.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pulled%20pork%2C%20jalapeno%20sausage%2C%20collard%20greens%2C%20and%20baked%20beans%20-%20Cambridge%2C%20MA.jpg?width=800"
+      },
+      "Smoked Cobbler": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Peach_Cobbler_2.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Peach%20Cobbler%202.jpg?width=800"
+      },
+      "Texas Sheet Cake": {
+        "file_page": "https://commons.wikimedia.org/wiki/File:Chocolate_Guinness_cake_-_The_Cafe_at_Foyles_2025-07-11.jpg",
+        "license": "CC0",
+        "source": "commons",
+        "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Chocolate%20Guinness%20cake%20-%20The%20Cafe%20at%20Foyles%202025-07-11.jpg?width=800"
+      }
+    }
+  }
+}

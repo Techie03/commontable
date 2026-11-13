@@ -49,6 +49,37 @@ def get_current_user(
     return user
 
 
+def get_optional_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(_bearer),
+    db: Session = Depends(get_db),
+) -> User | None:
+    """Like get_current_user, but returns None instead of raising when no
+    valid token is presented. For endpoints that are public for one set of
+    data and staff-gated for the rest (restaurant detail/menu: customers
+    see active restaurants, staff scoped to a restaurant see theirs)."""
+    if credentials is None:
+        return None
+    payload = decode_token(credentials.credentials)
+    if payload is None or payload.get("type") != "access":
+        return None
+    jti = payload.get("jti")
+    if jti and db.query(RevokedToken).filter(RevokedToken.jti == jti).first():
+        return None
+    try:
+        user_id = int(payload.get("sub"))
+    except (TypeError, ValueError):
+        return None
+    user = (
+        db.query(User)
+        .options(joinedload(User.roles).joinedload(UserRole.role))
+        .filter(User.id == user_id)
+        .first()
+    )
+    if user is None or not user.is_active:
+        return None
+    return user
+
+
 def require_roles(*role_names: str):
     """Dependency factory: the caller must hold at least one named role."""
 
@@ -78,6 +109,19 @@ def require_restaurant_access(
     roles = allowed_roles or RESTAURANT_ROLES
     if not user.has_role(*roles, scope_id=restaurant_id):
         raise forbidden("You do not have access to this restaurant")
+
+
+def has_restaurant_access(
+    restaurant_id: int, user: User | None, allowed_roles: list[str] | None = None
+) -> bool:
+    """Non-raising version of require_restaurant_access: True when the
+    user is admin or holds a restaurant role scoped to this restaurant."""
+    if user is None:
+        return False
+    if is_admin(user):
+        return True
+    roles = allowed_roles or RESTAURANT_ROLES
+    return user.has_role(*roles, scope_id=restaurant_id)
 
 
 def require_order_access(order: Order, user: User) -> None:

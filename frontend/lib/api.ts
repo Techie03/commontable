@@ -10,6 +10,7 @@
 import type {
   AdminMetrics,
   AuthResponse,
+  BrowseMenu,
   DeliveryTask,
   DispatchBoard,
   DriverProfile,
@@ -316,6 +317,11 @@ export function getMenu(restaurantId: string): Promise<MenuItem[]> {
     if (Array.isArray(r)) return r;
     return r.items ?? [];
   });
+}
+
+/** Browse-only menu for a prospect (coming soon) restaurant. */
+export function getBrowseMenu(restaurantId: string): Promise<BrowseMenu> {
+  return get<BrowseMenu>(`/api/v1/restaurants/${restaurantId}/browse-menu`);
 }
 
 export function createMenuItem(

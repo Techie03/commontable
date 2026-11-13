@@ -101,6 +101,8 @@ export interface Restaurant {
   locations?: RestaurantLocation[];
   location?: RestaurantLocation | null;
   address?: string | RestaurantAddressObject;
+  /** True when a prospect restaurant has a collected menu to browse. */
+  has_menu?: boolean;
 }
 
 export interface Modifier {
@@ -118,6 +120,21 @@ export interface MenuItem {
   available: boolean;
   image_url?: string | null;
   modifiers?: Modifier[];
+}
+
+/** Browse-only menu for a prospect restaurant. price_cents 0 means the
+ *  restaurant publishes no price for that item; the UI shows
+ *  "Price not listed" for those. Nothing here is orderable. */
+export interface BrowseMenu {
+  restaurant_id: number | string;
+  name: string;
+  website?: string | null;
+  primary_category?: string | null;
+  phone?: string | null;
+  locations?: RestaurantLocation[];
+  browse_only: boolean;
+  menus: { id: number; name: string; active: boolean; items: MenuItem[] }[];
+  items: MenuItem[];
 }
 
 export type OrderStatus =

@@ -84,4 +84,5 @@ def test_public_list_still_excludes_prospects(client, seeded):
     assert res.status_code == 200, res.text
     names = {r["name"] for r in res.json()["items"]}
     assert "Test Taqueria" not in names
-    assert "Demo Diner (Denton Pilot)" in names
+    # Demo restaurants are internal test data, never listed publicly.
+    assert "Demo Diner (Denton Pilot)" not in names

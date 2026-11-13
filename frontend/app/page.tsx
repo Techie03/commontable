@@ -17,7 +17,6 @@ export default function Home() {
             CommonTable
           </a>
           <nav aria-label="Page sections">
-            <a href="#menu">Menu</a>
             <a href="#restaurants">Restaurants</a>
             <a href="#portals">Portals</a>
             <a href="#problem">Problem</a>

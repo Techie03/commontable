@@ -454,7 +454,10 @@ function OrderFlow() {
           {loadingRestaurants ? (
             <p>Loading restaurants…</p>
           ) : restaurants.length === 0 ? (
-            <p>No restaurants are serving this address yet.</p>
+            <p>
+              No restaurants are serving this address yet. Below, you can
+              browse real menus from local restaurants coming soon.
+            </p>
           ) : (
             <ul className="app-list">
               {restaurants.map((r) => (
@@ -507,6 +510,14 @@ function OrderFlow() {
                       .join(" · ")}
                   </span>
                 </span>
+                {r.has_menu && (
+                  <Link
+                    href={`/menu/${r.id}`}
+                    className="app-btn app-btn-small app-btn-ghost"
+                  >
+                    View menu
+                  </Link>
+                )}
               </li>
             ))}
           </ul>

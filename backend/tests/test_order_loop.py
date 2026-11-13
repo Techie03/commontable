@@ -21,12 +21,15 @@ def test_full_standard_order_loop(client, seeded):
     restaurant_id = seeded["restaurant_id"]
     item = _available_item(seeded)
 
-    # Serviceability + menu are public.
+    # Serviceability is public; the demo restaurant's menu is visible to
+    # its own staff (anonymous customers never see demo restaurants).
     svc = client.get("/api/v1/dispatch/serviceability?postal_code=76201")
     assert svc.status_code == 200
     assert svc.json()["serviceable"] is True
     assert svc.json()["fulfillment_options"] == ["pickup", "standard"]
-    menu = client.get(f"/api/v1/restaurants/{restaurant_id}/menu")
+    menu = client.get(
+        f"/api/v1/restaurants/{restaurant_id}/menu", headers=staff
+    )
     assert menu.status_code == 200
     assert "items" in menu.json()
     assert len(menu.json()["items"]) == 6

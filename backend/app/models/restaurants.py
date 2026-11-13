@@ -6,9 +6,10 @@ from sqlalchemy.orm import relationship
 from app.db.session import Base
 from app.models.common import utc_datetime, utcnow
 
-# Restaurant status (contract section 7). Only "active" and "demo" are
-# visible to customers; "prospect" restaurants are census data, unclaimed,
-# never orderable, and never presented as partners.
+# Restaurant status (contract section 7). Only "active" is visible to
+# customers; "demo" is internal test data, invisible publicly;
+# "prospect" restaurants are census data, unclaimed, never orderable,
+# and never presented as partners.
 STATUS_PROSPECT = "prospect"
 STATUS_PENDING = "pending"
 STATUS_ACTIVE = "active"
@@ -28,8 +29,16 @@ SOURCE_CENSUS = "census"
 SOURCE_SEED = "seed"
 SOURCE_MANUAL = "manual"
 
-# Statuses a customer may ever see or order from.
-PUBLIC_STATUSES = [STATUS_ACTIVE, STATUS_DEMO]
+# Statuses a customer may ever see or order from. Demo restaurants are
+# internal test fixtures: staff scoped to one can still open its
+# dashboard and menu (see the auth-aware gates in api/restaurants.py),
+# but customers never see them in lists or menus.
+PUBLIC_STATUSES = [STATUS_ACTIVE]
+
+# Statuses an order may be placed against. Demo is orderable only via
+# direct API calls (test tooling); it is never listed, so customers
+# cannot reach it. Prospects are never orderable.
+ORDERABLE_STATUSES = [STATUS_ACTIVE, STATUS_DEMO]
 
 
 class Restaurant(Base):

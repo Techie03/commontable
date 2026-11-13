@@ -82,10 +82,11 @@ def test_importer_idempotent_and_prospects_hidden(client, seeded):
     assert all(r["status"] == "prospect" for r in admin_list["items"])
     assert all(r["source"] == "census" for r in admin_list["items"])
 
-    # Prospects never appear in the public restaurant list.
+    # Prospects never appear in the public restaurant list, and neither
+    # does the demo restaurant (internal test data, never listed).
     public = client.get("/api/v1/restaurants").json()
-    assert public["total"] == 1
-    assert public["items"][0]["name"] == "Demo Diner (Denton Pilot)"
+    assert public["total"] == 0
+    assert public["items"] == []
 
     # Prospect detail is 404 for the public.
     prospect_id = admin_list["items"][0]["id"]

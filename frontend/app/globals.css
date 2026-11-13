@@ -3254,3 +3254,21 @@ select.app-input {
   font-size: 0.88rem;
   color: var(--charcoal-soft);
 }
+
+/* Browse-only menu page banner */
+.browse-banner {
+  background: var(--teal-pale);
+  border: 1px solid var(--teal-light);
+  border-radius: 0.75rem;
+  padding: 0.9rem 1rem;
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+}
+
+/* "View menu" link on coming-soon cards (landing page) */
+.spot-menu-link {
+  display: inline-block;
+  margin-left: 0.6rem;
+  font-weight: 700;
+  color: var(--teal);
+}

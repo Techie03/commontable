@@ -3,7 +3,13 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from app.core.deps import get_current_user, is_admin, require_restaurant_access
+from app.core.deps import (
+    get_current_user,
+    get_optional_user,
+    has_restaurant_access,
+    is_admin,
+    require_restaurant_access,
+)
 from app.core.errors import bad_request, conflict, forbidden, not_found
 from app.db.session import get_db
 from app.models.geo import Address, ServiceZone
@@ -60,8 +66,9 @@ def list_restaurants(
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
-    """Public list. Only active and demo restaurants, ever. Prospect
-    (census, unclaimed) restaurants are never listed and never orderable."""
+    """Public list. Only active restaurants, ever. Demo restaurants are
+    internal test data, never listed. Prospect (census, unclaimed)
+    restaurants are never listed and never orderable."""
     query = (
         db.query(Restaurant)
         .filter(Restaurant.status.in_(PUBLIC_STATUSES))
@@ -126,8 +133,23 @@ def list_coming_soon(
         ]
     total = len(restaurants)
     sliced = restaurants[(page - 1) * page_size : page * page_size]
+    # Pilot restaurants with a collected menu get a "View menu" link; the
+    # flag is one query for the whole page, not one per restaurant.
+    menu_restaurant_ids = {
+        rid
+        for (rid,) in db.query(Menu.restaurant_id)
+        .join(MenuItem, MenuItem.menu_id == Menu.id)
+        .filter(Menu.active.is_(True))
+        .distinct()
+        .all()
+    }
+    items = []
+    for r in sliced:
+        d = restaurant_to_out(r).model_dump()
+        d["has_menu"] = r.id in menu_restaurant_ids
+        items.append(d)
     return {
-        "items": [restaurant_to_out(r) for r in sliced],
+        "items": items,
         "page": page,
         "page_size": page_size,
         "total": total,
@@ -135,18 +157,43 @@ def list_coming_soon(
 
 
 @router.get("/{restaurant_id}", response_model=RestaurantOut)
-def get_restaurant(restaurant_id: int, db: Session = Depends(get_db)):
+def get_restaurant(
+    restaurant_id: int,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(get_optional_user),
+):
+    """Restaurant detail. Customers see active restaurants; staff scoped
+    to a restaurant (and admins) also see theirs whatever its status, so
+    the restaurant dashboard keeps working for test restaurants."""
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
-    if restaurant is None or restaurant.status not in PUBLIC_STATUSES:
+    if restaurant is None:
+        raise not_found("Restaurant not found")
+    if restaurant.status not in PUBLIC_STATUSES and not has_restaurant_access(
+        restaurant_id, user
+    ):
         raise not_found("Restaurant not found")
     return restaurant_to_out(restaurant)
 
 
 @router.get("/{restaurant_id}/menu")
-def get_menu(restaurant_id: int, db: Session = Depends(get_db)):
-    """Menu items under the "items" key (contract coordination note 6)."""
+def get_menu(
+    restaurant_id: int,
+    db: Session = Depends(get_db),
+    user: User | None = Depends(get_optional_user),
+):
+    """Menu items under the "items" key (contract coordination note 6).
+
+    Customers see active restaurants' menus; staff scoped to a
+    restaurant (and admins) also see theirs whatever its status, so the
+    restaurant menu page keeps working for test restaurants. Prospect
+    menus are browse-only and served by browse-menu instead.
+    """
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
-    if restaurant is None or restaurant.status not in PUBLIC_STATUSES:
+    if restaurant is None:
+        raise not_found("Restaurant not found")
+    if restaurant.status not in PUBLIC_STATUSES and not has_restaurant_access(
+        restaurant_id, user
+    ):
         raise not_found("Restaurant not found")
     menus = (
         db.query(Menu)
@@ -158,6 +205,49 @@ def get_menu(restaurant_id: int, db: Session = Depends(get_db)):
         items.extend(menu_item_to_out(item) for item in menu.items)
     return {
         "restaurant_id": restaurant.id,
+        "menus": [
+            MenuOut(
+                id=m.id,
+                name=m.name,
+                active=m.active,
+                items=[menu_item_to_out(i) for i in m.items],
+            )
+            for m in menus
+        ],
+        "items": items,
+    }
+
+
+@router.get("/{restaurant_id}/browse-menu")
+def get_browse_menu(restaurant_id: int, db: Session = Depends(get_db)):
+    """Browse-only menu for a prospect (coming soon) restaurant.
+
+    The restaurant has NOT joined CommonTable: its menu was collected
+    from its own published menu and is shown for browsing only. Ordering
+    is impossible: place_order rejects non-orderable statuses, and
+    prospects never appear in the public restaurant list. Items with
+    price_cents 0 have no published price; the UI shows "Price not
+    listed" for those.
+    """
+    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+    if restaurant is None or restaurant.status != STATUS_PROSPECT:
+        raise not_found("Restaurant not found")
+    menus = (
+        db.query(Menu)
+        .filter(Menu.restaurant_id == restaurant.id, Menu.active.is_(True))
+        .all()
+    )
+    items = []
+    for menu in menus:
+        items.extend(menu_item_to_out(item) for item in menu.items)
+    return {
+        "restaurant_id": restaurant.id,
+        "name": restaurant.name,
+        "website": restaurant.website,
+        "primary_category": restaurant.primary_category,
+        "phone": restaurant.phone,
+        "locations": [location_to_out(loc) for loc in restaurant.locations],
+        "browse_only": True,
         "menus": [
             MenuOut(
                 id=m.id,

@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session
 from app.core.errors import bad_request, conflict, not_found
 from app.models.geo import Address, ServiceZone
 from app.models.identity import User
+from app.models.restaurants import ORDERABLE_STATUSES
 from app.models.orders import (
     CANCELLABLE_STATUSES,
     CHANNEL_DIRECT2DOOR,
@@ -143,7 +144,7 @@ def place_order(
         raise bad_request("Tip cannot be negative")
 
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
-    if restaurant is None or restaurant.status not in ("active", "demo"):
+    if restaurant is None or restaurant.status not in ORDERABLE_STATUSES:
         raise not_found("Restaurant not found or not orderable")
 
     if not items:
