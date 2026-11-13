@@ -18,6 +18,7 @@ export default function Home() {
           <nav aria-label="Page sections">
             <a href="#menu">Menu</a>
             <a href="#restaurants">Restaurants</a>
+            <a href="#portals">Portals</a>
             <a href="#problem">Problem</a>
             <a href="#concepts">Concepts</a>
             <a href="#delivery">Delivery options</a>
@@ -55,6 +56,77 @@ export default function Home() {
       </section>
 
       <HomeLiveSections />
+
+      <section className="section" id="portals">
+        <div className="container">
+          <h2>Portals for every role</h2>
+          <p className="lede">
+            CommonTable is one network with a portal for each side of the
+            table. Sign in to open your portal. One account can hold several
+            roles.
+          </p>
+          <div className="card-grid">
+            <article className="card">
+              <h3>Customer</h3>
+              <p>
+                Browse menus, place orders, and track delivery live.
+              </p>
+              <p>
+                <a className="section-cta-btn" href="/order">
+                  Open the customer portal
+                </a>
+              </p>
+            </article>
+            <article className="card">
+              <h3>Restaurant</h3>
+              <p>
+                Manage your menu, receive orders, and run Direct2Door
+                delivery from your own site.
+              </p>
+              <p>
+                <a className="section-cta-btn" href="/restaurant">
+                  Open the restaurant portal
+                </a>
+              </p>
+            </article>
+            <article className="card">
+              <h3>Driver</h3>
+              <p>
+                See assigned deliveries and confirm pickup and delivery.
+              </p>
+              <p>
+                <a className="section-cta-btn" href="/driver">
+                  Open the driver portal
+                </a>
+              </p>
+            </article>
+            <article className="card">
+              <h3>Dispatcher</h3>
+              <p>
+                Watch live orders, assign drivers, and keep deliveries on
+                track.
+              </p>
+              <p>
+                <a className="section-cta-btn" href="/dispatch">
+                  Open the dispatch portal
+                </a>
+              </p>
+            </article>
+            <article className="card">
+              <h3>Admin</h3>
+              <p>
+                Manage users, roles, restaurants, zones, pricing, and the
+                ledger.
+              </p>
+              <p>
+                <a className="section-cta-btn" href="/admin">
+                  Open the admin console
+                </a>
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
 
       <section className="section" id="problem">
         <div className="container">

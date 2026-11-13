@@ -356,7 +356,7 @@
     {
       "place_id": "756366735569232",
       "name": "Arby's",
-      "address": "901 West University Drive Universirty Dr & Alice St",
+      "address": "901 West University Drive University Dr & Alice St",
       "city": "Denton",
       "state": "TX",
       "zip": "76201",
@@ -382,7 +382,7 @@
         "Saturday": "10:00 AM - 11:00 PM",
         "Sunday": "10:00 AM - 11:00 PM"
       },
-      "maps_search_url": "https://www.google.com/maps/search/?api=1&query=Arby%27s%2C+901+West+University+Drive+Universirty+Dr+%26+Alice+St%2C+Denton%2C+TX%2C+76201"
+      "maps_search_url": "https://www.google.com/maps/search/?api=1&query=Arby%27s%2C+901+West+University+Drive+University+Dr+%26+Alice+St%2C+Denton%2C+TX%2C+76201"
     },
     {
       "place_id": "3308346596157249",
