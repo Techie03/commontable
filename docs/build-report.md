@@ -394,7 +394,18 @@ coordinator updates this list to match the script's own output.
 
 - Repo: https://github.com/Techie03/commontable
 - Branch: `main`
-- Commit(s) for this slice: (filled after the push — see below)
+- Commit(s) for this slice (pushed Nov 12 via the snapshot procedure;
+  one full-tree push timed out on the provider side, so the slice went
+  up in three balanced batches of changed/new files only):
+  - `2af0fb49644dc186c6ba65dc29ad45c010512354` — "MVP slice part 1 of 3:
+    backend core models/services, census data, auth pages" (21 files)
+  - `3c22b865fc114d5c332b9185cd34b19bf2f3bea2` — "MVP slice part 2 of 3:
+    backend routers/services, contract doc, census CSV, frontend lib"
+    (29 files)
+  - `118cb22f7e74a15722df2ddbd2d08cdefd2fe958` — "MVP slice part 3 of 3:
+    remaining backend/frontend, build report, smoke test" (32 files)
+  - Head after the slice: `118cb22f`. (A later commit updates this
+    report itself with the hashes and Vercel status.)
 - Open PRs, if any: none (snapshot push direct to `main`, per the
   repo's established push procedure)
 
@@ -403,14 +414,17 @@ coordinator updates this list to match the script's own output.
 ## 6. Live Vercel status
 
 - Site: https://trycommontable.vercel.app
-- Deployment for this slice: (filled after the push — GitHub
-  auto-deploy rebuilds the frontend on push to `main`)
+- Deployment for this slice: GitHub auto-deploy on push to `main`.
+  Verified live Nov 12 evening (after the push): `/` 200, `/order`
+  200, `/admin` 200, `/prototype` 200. The new slice pages are on the
+  public site.
 - Backend connected: **no** — the live site has no backend yet, so
   the slice pages show the "live ordering service is not connected
   yet" message. Backend hosting is a separate decision (no hosting
   credentials exist).
 - `/` and `/prototype` untouched: yes — verified in the production
-  build route table and via HTTP 200 checks (§4.4).
+  build route table and via HTTP 200 checks (§4.4), and live after
+  the deploy.
 
 ### Local run instructions
 
@@ -509,5 +523,6 @@ Still open after this slice:
 - Verified by: coordinator (integration run; backend pytest 37 passed,
   Alembic on real PostgreSQL + PostGIS, frontend build clean,
   smoke test 46/46 PASS twice)
-- Notes: GitHub commit hash and Vercel deployment status are filled
-  into §5–§6 after the push.
+- Notes: GitHub commit hashes and Vercel deployment status recorded
+  in §5–§6 above (commit `118cb22f` head at push time; this report's
+  own update is a follow-up commit).
