@@ -1,9 +1,11 @@
 // CommonTable landing page. Content is grounded in the startup blueprint
 // (workspace/user/files/CommonTable_Direct2Door_Startup_Blueprint.docx).
-// Landing page only: no ordering, account, or app functionality here.
+// Live sections (demo menu, restaurants coming soon) fetch from the API
+// client-side in ./home-live and link to /order; no checkout happens here.
 // Prices are labeled as planning hypotheses, per the blueprint.
 
 import DemoWalkthrough from "./demo";
+import HomeLiveSections from "./home-live";
 
 export default function Home() {
   return (
@@ -14,6 +16,8 @@ export default function Home() {
             CommonTable
           </a>
           <nav aria-label="Page sections">
+            <a href="#menu">Menu</a>
+            <a href="#restaurants">Restaurants</a>
             <a href="#problem">Problem</a>
             <a href="#concepts">Concepts</a>
             <a href="#delivery">Delivery options</a>
@@ -39,13 +43,18 @@ export default function Home() {
           <span className="pilot-badge">
             Now building. Piloting in Denton, TX.
           </span>
-          <div>
-            <a className="hero-cta" href="/prototype">
+          <div className="hero-cta-row">
+            <a className="hero-cta" href="/order">
+              Order food
+            </a>
+            <a className="hero-cta hero-cta-secondary" href="/prototype">
               Try the live prototype
             </a>
           </div>
         </div>
       </section>
+
+      <HomeLiveSections />
 
       <section className="section" id="problem">
         <div className="container">

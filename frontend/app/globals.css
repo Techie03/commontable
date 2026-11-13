@@ -2984,3 +2984,137 @@ select.app-input {
 .app-issue h3 {
   margin-bottom: 0.75rem;
 }
+
+
+/* Live landing sections: demo menu with photos, restaurants coming soon */
+
+.hero-cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.hero-cta-secondary {
+  background: transparent;
+  color: var(--warm-white);
+  box-shadow: inset 0 0 0 2px var(--warm-white);
+}
+
+.hero-cta-secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.food-grid,
+.spot-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .food-grid,
+  .spot-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .food-grid,
+  .spot-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.food-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  overflow: hidden;
+}
+
+.food-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.food-body {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.food-body h3 {
+  font-size: 1.1rem;
+  color: var(--forest);
+  margin: 0 0 0.25rem;
+}
+
+.food-price {
+  color: var(--teal);
+  font-weight: 700;
+  margin: 0;
+}
+
+.food-tag {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--charcoal-soft);
+  background: var(--warm-sand);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+}
+
+.spot-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0.9rem;
+  padding: 1.25rem;
+}
+
+.spot-card h3 {
+  font-size: 1.05rem;
+  color: var(--forest);
+  margin: 0 0 0.35rem;
+}
+
+.spot-card p {
+  color: var(--charcoal-soft);
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+}
+
+.spot-tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--teal);
+  background: var(--teal-pale);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+}
+
+.section-cta {
+  margin: 1.75rem 0 0;
+}
+
+.section-cta-btn {
+  display: inline-block;
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--warm-white);
+  background: var(--forest);
+  border-radius: 999px;
+  padding: 0.8rem 1.75rem;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.section-cta-btn:hover {
+  background: var(--teal);
+  transform: translateY(-1px);
+}
