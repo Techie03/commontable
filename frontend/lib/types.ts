@@ -132,6 +132,11 @@ export interface OrderItem {
   unit_price_cents?: number;
   price_cents?: number;
   total_cents?: number;
+  // The live API returns top-level order items with snapshot fields.
+  name_snapshot?: string;
+  price_snapshot_cents?: number;
+  line_total_cents?: number;
+  modifiers_snapshot?: Array<{ name?: string; price_cents?: number }>;
   modifiers?: Array<{ name: string; price_cents?: number }>;
 }
 
@@ -371,6 +376,56 @@ export function orderFees(order: Order): FeeBreakdown {
 /** Status events from whichever field the API populated. */
 export function orderEvents(order: Order): StatusEvent[] {
   return order.status_events ?? order.timeline ?? [];
+}
+
+/** One display line per ordered item. The live API returns top-level
+ *  order items with name_snapshot / price_snapshot_cents, while the
+ *  checkout snapshot items carry name / price_cents. Read the snapshot
+ *  fields first so real orders never render as "Menu item - $0.00". */
+export interface OrderLineItem {
+  key: string;
+  name: string;
+  quantity: number;
+  unit_price_cents: number;
+  total_cents: number;
+  modifiers: string[];
+}
+
+export function orderLineItems(order: Order): OrderLineItem[] {
+  const names = (mods: Array<{ name?: string }> | undefined): string[] =>
+    (mods ?? [])
+      .map((m) => m.name)
+      .filter((n): n is string => typeof n === "string" && n !== "");
+  const top = order.items ?? [];
+  if (top.length > 0) {
+    return top.map((item, idx) => {
+      const unit =
+        item.price_snapshot_cents ??
+        item.unit_price_cents ??
+        item.price_cents ??
+        0;
+      return {
+        key: `${item.menu_item_id}-${idx}`,
+        name: item.name_snapshot ?? item.name ?? "Menu item",
+        quantity: item.quantity,
+        unit_price_cents: unit,
+        total_cents:
+          item.line_total_cents ?? item.total_cents ?? unit * item.quantity,
+        modifiers: names(item.modifiers_snapshot ?? item.modifiers),
+      };
+    });
+  }
+  return (order.checkout_snapshot?.items ?? []).map((item, idx) => {
+    const unit = item.unit_price_cents ?? item.price_cents ?? 0;
+    return {
+      key: `${item.menu_item_id}-${idx}`,
+      name: item.name ?? "Menu item",
+      quantity: item.quantity,
+      unit_price_cents: unit,
+      total_cents: item.total_cents ?? unit * item.quantity,
+      modifiers: names(item.modifiers),
+    };
+  });
 }
 
 /** Short display form of an id. The live API returns integer ids, so a

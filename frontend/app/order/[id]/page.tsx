@@ -25,6 +25,7 @@ import {
   addressLine,
   orderDisplayName,
   orderEvents,
+  orderLineItems,
   type Order,
   type StatusEvent,
 } from "@/lib/types";
@@ -229,25 +230,19 @@ function OrderDetail({ id }: { id: string }) {
         <section className="app-card" aria-label="Order total">
           <h2>Your order</h2>
           <ul className="app-list">
-            {order.items.map((item, idx) => (
-              <li key={`${item.menu_item_id}-${idx}`} className="app-list-row">
+            {orderLineItems(order).map((item) => (
+              <li key={item.key} className="app-list-row">
                 <span>
                   <strong>
-                    {item.quantity} × {item.name ?? "Menu item"}
+                    {item.quantity} × {item.name}
                   </strong>
-                  {item.modifiers && item.modifiers.length > 0 && (
+                  {item.modifiers.length > 0 && (
                     <span className="app-list-sub">
-                      {item.modifiers.map((m) => m.name).join(", ")}
+                      {item.modifiers.join(", ")}
                     </span>
                   )}
                 </span>
-                <span>
-                  {formatCents(
-                    item.total_cents ??
-                      (item.unit_price_cents ?? item.price_cents ?? 0) *
-                        item.quantity
-                  )}
-                </span>
+                <span>{formatCents(item.total_cents)}</span>
               </li>
             ))}
           </ul>

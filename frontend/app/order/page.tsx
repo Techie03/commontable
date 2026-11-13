@@ -117,11 +117,24 @@ function OrderFlow() {
     setCart(draft.cart ?? []);
     setFulfillment(draft.fulfillment ?? "standard");
     setTipCents(draft.tipCents ?? 0);
+    const postal = draft.address.postal_code?.trim();
+    const city = draft.address.city?.trim();
+    if (postal && city) {
+      checkServiceability(postal, city)
+        .then((res) => {
+          setService(res);
+          if (res.serviceable) void loadRestaurants(postal);
+        })
+        .catch(() => undefined);
+    }
     if (draft.restaurantId) {
-      listRestaurants(draft.address.postal_code || undefined)
+      listRestaurants(postal || undefined)
         .then((all) => {
           const found = all.find((r) => String(r.id) === String(draft.restaurantId));
-          if (found && found.status !== "prospect") setSelected(found);
+          if (found && found.status !== "prospect") {
+            setSelected(found);
+            getMenu(found.id).then(setMenu).catch(() => undefined);
+          }
         })
         .catch(() => undefined);
     }

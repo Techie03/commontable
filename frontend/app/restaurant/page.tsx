@@ -26,6 +26,7 @@ import { formatCents } from "@/lib/money";
 import {
   orderDisplayName,
   orderFees,
+  orderLineItems,
   type Order,
   type Restaurant,
 } from "@/lib/types";
@@ -283,11 +284,11 @@ function RestaurantDashboard() {
                       : ""}
                   </span>
                   <ul className="app-item-lines">
-                    {o.items.map((item, idx) => (
-                      <li key={`${item.menu_item_id}-${idx}`}>
-                        {item.quantity} × {item.name ?? "Menu item"}
-                        {item.modifiers && item.modifiers.length > 0
-                          ? ` (${item.modifiers.map((m) => m.name).join(", ")})`
+                    {orderLineItems(o).map((item) => (
+                      <li key={item.key}>
+                        {item.quantity} × {item.name}
+                        {item.modifiers.length > 0
+                          ? ` (${item.modifiers.join(", ")})`
                           : ""}
                       </li>
                     ))}

@@ -17,7 +17,7 @@ import {
   wsUrl,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
-import { addressLine, shortId, type DispatchBoard, type Order } from "@/lib/types";
+import { addressLine, orderLineItems, shortId, type DispatchBoard, type Order } from "@/lib/types";
 
 export default function DispatchPage() {
   return (
@@ -184,8 +184,8 @@ function DispatchBoardView() {
                       : ""}
                   </span>
                   <span className="app-list-sub">
-                    {o.items
-                      .map((i) => `${i.quantity} × ${i.name ?? "Menu item"}`)
+                    {orderLineItems(o)
+                      .map((i) => `${i.quantity} × ${i.name}`)
                       .join(", ")}
                   </span>
                 </div>
