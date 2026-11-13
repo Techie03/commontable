@@ -173,3 +173,20 @@ optimization, the React Native driver app, a real payment provider
 billing, loyalty/ads/recommendations, group ordering, ML dispatch, and
 multi-zone support. Direct2Door ships as the dashboard handoff only — no
 quote endpoint and no API/webhook intake in this slice.
+
+## Deploying (Render + Supabase, free tier)
+
+- Backend: Render Blueprint (`render.yaml`) — free web service
+  `commontable-api`. Set `DATABASE_URL` to the Supabase session-pooler
+  connection string and `JWT_SECRET_KEY` to a long random secret at deploy
+  time. The start command runs migrations, the demo seed, and the Denton
+  census import (all idempotent) before starting uvicorn. Free services
+  sleep after 15 minutes idle and take about a minute to wake.
+- Database: Supabase free project (500 MB). Enable the PostGIS extension
+  (Dashboard -> Database -> Extensions); the Alembic migration also runs
+  `CREATE EXTENSION IF NOT EXISTS postgis`. Free projects pause after 7
+  days of inactivity; resume from the Supabase dashboard.
+- Frontend: Vercel project `commontable` (root `frontend`). Set
+  `NEXT_PUBLIC_API_URL` to the Render service URL (for example
+  `https://commontable-api.onrender.com`) and redeploy. The frontend reads
+  it at build time.
