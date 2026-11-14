@@ -54,6 +54,9 @@ class RestaurantCreate(BaseModel):
     # checks these against a public listing before approval.
     owner_name: str = Field(min_length=1, max_length=255)
     business_address: str = Field(min_length=1, max_length=500)
+    # Business type (Restaurant, Food Truck, Bakery, ...), from the landing
+    # signup form. Optional; shown as the restaurant's category in the feed.
+    primary_category: str | None = Field(default=None, max_length=100)
 
 
 class RestaurantUpdate(BaseModel):
@@ -66,6 +69,7 @@ class RestaurantUpdate(BaseModel):
     website: str | None = None
     owner_name: str | None = None
     business_address: str | None = None
+    primary_category: str | None = None
 
 
 class RestaurantVerifyIn(BaseModel):

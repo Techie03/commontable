@@ -344,6 +344,7 @@ export function createRestaurant(body: {
   direct2door_enabled?: boolean;
   owner_name: string;
   business_address: string;
+  primary_category?: string;
 }): Promise<Restaurant> {
   return post<Restaurant>("/api/v1/restaurants", body);
 }

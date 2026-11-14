@@ -83,3 +83,15 @@ def test_verify_requires_admin(client, seeded):
         headers=customer,
     )
     assert res.status_code == 403, res.text
+
+
+def test_signup_stores_business_type(client, seeded):
+    admin = demo_headers(client, "admin")
+    res = _apply(client, admin, primary_category="Food Truck")
+    assert res.status_code == 201, res.text
+    assert res.json()["primary_category"] == "Food Truck"
+
+    # Without a business type the category stays empty, not an error.
+    res = _apply(client, admin)
+    assert res.status_code == 201, res.text
+    assert res.json()["primary_category"] is None

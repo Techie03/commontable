@@ -6,58 +6,24 @@
 
 import DemoWalkthrough from "./demo";
 import HomeLiveSections from "./home-live";
-import PortalsDropdown from "@/components/PortalsDropdown";
+import LandingHeader from "./landing-header";
+import JoinForm from "./join-form";
+import { AuthProvider } from "@/lib/auth";
 
 export default function Home() {
   return (
     <main>
-      <header className="topbar">
-        <div className="container topbar-inner">
-          <a className="wordmark" href="#top">
-            CommonTable
-          </a>
-          <nav aria-label="Page sections">
-            <a href="#restaurants">Restaurants</a>
-            <a href="#portals">Portals</a>
-            <a href="#problem">Problem</a>
-            <a href="#concepts">Concepts</a>
-            <a href="#delivery">Delivery options</a>
-            <a href="#how-it-works">How it works</a>
-            <a href="#roadmap">Roadmap</a>
-          </nav>
-          <div className="topbar-actions">
-            <PortalsDropdown />
-            <a className="topbar-signin" href="/login">
-              Sign in
-            </a>
-          </div>
-          <span className="status-pill">In development</span>
-        </div>
-      </header>
+      <LandingHeader />
 
-      <section className="hero" id="top">
-        <div className="container">
-          <h1>CommonTable</h1>
-          <p className="tagline">
-            Restaurant prices. Affordable delivery. One smarter local network.
-          </p>
-          <p className="intro">
-            CommonTable is a local food delivery network in development. It
-            brings together customers, independent restaurants, and a shared
-            driver network, so delivery costs less and stays fair to everyone
-            at the table.
-          </p>
-          <span className="pilot-badge">
-            Now building. Piloting in Denton, TX.
-          </span>
-          <div className="hero-cta-row">
-            <a className="hero-cta" href="/order">
-              Order food
-            </a>
-            <a className="hero-cta hero-cta-secondary" href="/prototype">
-              Try the live prototype
-            </a>
-          </div>
+      <section className="lp-hero" id="top">
+        <div className="container lp-hero-inner">
+          <h1 className="lp-headline">
+            Reach <span className="lp-accent">hungry customers</span> in
+            Denton
+          </h1>
+          <AuthProvider>
+            <JoinForm />
+          </AuthProvider>
         </div>
       </section>
 

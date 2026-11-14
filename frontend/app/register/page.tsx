@@ -13,6 +13,7 @@ import AppShell from "@/components/AppShell";
 import ApiOffline from "@/components/ApiOffline";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { readRestaurantLead } from "@/lib/restaurant-lead";
 
 const ROLES = [
   {
@@ -59,10 +60,14 @@ function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
 
-  // Preselect the role from ?role= when the header menu deep-links here.
+  // Preselect the role from ?role= when the header menu deep-links here,
+  // and prefill the email from the landing-page signup form when the
+  // visitor came through it.
   useEffect(() => {
     const param = new URLSearchParams(window.location.search).get("role");
     if (isRoleValue(param)) setRole(param);
+    const lead = readRestaurantLead();
+    if (lead?.email) setEmail(lead.email);
   }, []);
 
   async function handleSubmit(e: FormEvent) {

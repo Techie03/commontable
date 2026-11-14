@@ -3795,3 +3795,246 @@ select.app-input {
   justify-content: flex-end;
   margin-top: 1rem;
 }
+
+/* Landing page, in the style of the reference merchant site: sticky
+   header with Login + Get Started + hamburger menu, a bold two-tone
+   uppercase hero, and a white signup card. CommonTable's own brand
+   colors and honest copy; the layout is the part that matches. */
+
+.lp-header {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  background: var(--warm-white);
+  border-bottom: 1px solid var(--line);
+}
+
+.lp-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  height: 4rem;
+}
+
+.lp-wordmark {
+  color: var(--forest);
+  font-size: 1.3rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+}
+
+.lp-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.lp-login {
+  color: var(--charcoal);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lp-get-started {
+  background: var(--forest);
+  color: var(--warm-white);
+  border-radius: 999px;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lp-menu-btn {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  font: inherit;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: var(--charcoal);
+  cursor: pointer;
+}
+
+.lp-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 16px 32px rgb(0 0 0 / 0.1);
+  padding: 0.5rem 0 1rem;
+}
+
+.lp-menu-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid #f0ece3;
+  color: var(--charcoal);
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.lp-menu-link:last-child {
+  border-bottom: none;
+}
+
+.lp-hero {
+  background: var(--warm-sand);
+  padding: 2.5rem 0 3rem;
+}
+
+.lp-hero-inner {
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 900px) {
+  .lp-hero-inner {
+    grid-template-columns: 1.1fr 1fr;
+    align-items: start;
+  }
+}
+
+.lp-headline {
+  color: #1c1a17;
+  font-size: clamp(2.75rem, 7vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.lp-accent {
+  color: var(--teal);
+}
+
+.lp-join {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.08);
+  padding: 1.5rem;
+  scroll-margin-top: 5rem;
+}
+
+.lp-join h2 {
+  color: #1c1a17;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  margin: 0 0 0.5rem;
+}
+
+.lp-join-lede {
+  color: var(--charcoal-soft);
+  font-size: 0.92rem;
+  margin: 0 0 1.25rem;
+}
+
+.lp-field {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.lp-field input,
+.lp-field select {
+  width: 100%;
+  background: #f6f6f4;
+  border: none;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--charcoal);
+}
+
+.lp-field input:focus,
+.lp-field select:focus {
+  outline: 2px solid var(--teal-light);
+  outline-offset: 1px;
+}
+
+.lp-field input::placeholder {
+  color: #8a8578;
+}
+
+.lp-address-field {
+  position: relative;
+}
+
+.lp-address-field input {
+  padding-left: 2.5rem;
+}
+
+.lp-pin {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.95rem;
+}
+
+.lp-select-field {
+  position: relative;
+}
+
+.lp-select-field select {
+  appearance: none;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.lp-select-field select:invalid {
+  color: #8a8578;
+}
+
+.lp-chevron {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--charcoal-soft);
+  pointer-events: none;
+}
+
+.lp-join-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 560px) {
+  .lp-join-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lp-consent {
+  color: var(--charcoal-soft);
+  font-size: 0.8rem;
+  margin: 0.25rem 0 1rem;
+}
+
+.lp-submit {
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  background: var(--forest);
+  color: var(--warm-white);
+  padding: 0.9rem;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}

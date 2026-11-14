@@ -25,6 +25,10 @@ import {
 import { useAuth } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
 import {
+  clearRestaurantLead,
+  readRestaurantLead,
+} from "@/lib/restaurant-lead";
+import {
   orderDisplayName,
   orderFees,
   orderLineItems,
@@ -54,8 +58,22 @@ function RestaurantDashboard() {
   const [createDescription, setCreateDescription] = useState("");
   const [createOwnerName, setCreateOwnerName] = useState("");
   const [createAddress, setCreateAddress] = useState("");
+  const [createBusinessType, setCreateBusinessType] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+
+  // Prefill the setup form from the landing-page signup form, when the
+  // visitor came through it. The lead is cleared once the restaurant is
+  // created; the fields stay editable either way.
+  useEffect(() => {
+    const lead = readRestaurantLead();
+    if (!lead) return;
+    if (lead.name) setCreateName(lead.name);
+    if (lead.phone) setCreatePhone(lead.phone);
+    if (lead.email) setCreateEmail(lead.email);
+    if (lead.address) setCreateAddress(lead.address);
+    if (lead.businessType) setCreateBusinessType(lead.businessType);
+  }, []);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [reports, setReports] = useState<{
@@ -206,7 +224,9 @@ function RestaurantDashboard() {
         description: createDescription.trim() || undefined,
         owner_name: ownerName,
         business_address: address,
+        primary_category: createBusinessType || undefined,
       });
+      clearRestaurantLead();
       const id = String(created.id);
       setManualId(id);
       try {
@@ -304,6 +324,22 @@ function RestaurantDashboard() {
                 onChange={(e) => setCreateAddress(e.target.value)}
                 placeholder="Street, city, state, ZIP"
               />
+            </label>
+            <label className="app-field">
+              <span>Business type</span>
+              <select
+                className="app-input"
+                value={createBusinessType}
+                onChange={(e) => setCreateBusinessType(e.target.value)}
+              >
+                <option value="">Select your business type</option>
+                <option value="Restaurant">Restaurant</option>
+                <option value="Food Truck">Food Truck</option>
+                <option value="Bakery">Bakery</option>
+                <option value="Cafe">Cafe</option>
+                <option value="Grocery">Grocery</option>
+                <option value="Other">Other</option>
+              </select>
             </label>
             <label className="app-field">
               <span>Email (optional)</span>

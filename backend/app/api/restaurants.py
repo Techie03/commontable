@@ -375,6 +375,7 @@ def create_restaurant(
         website=body.website,
         owner_name=body.owner_name,
         business_address=body.business_address,
+        primary_category=body.primary_category,
         source="manual",
     )
     db.add(restaurant)
