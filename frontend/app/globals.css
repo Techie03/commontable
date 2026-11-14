@@ -2062,7 +2062,7 @@ a {
 
 .app-main h1 {
   color: var(--forest);
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   line-height: 1.15;
   letter-spacing: -0.01em;
   margin: 0 0 0.5rem;
@@ -2070,13 +2070,13 @@ a {
 
 .app-main h2 {
   color: var(--forest);
-  font-size: 1.25rem;
+  font-size: 1.1rem;
   margin: 0 0 0.75rem;
 }
 
 .app-main h3 {
   color: var(--forest);
-  font-size: 1.05rem;
+  font-size: 1rem;
   margin: 0 0 0.5rem;
 }
 
@@ -3424,8 +3424,8 @@ select.app-input {
 }
 
 .app-feed-card {
-  background: var(--warm-white);
-  border: 1px solid var(--line);
+  background: none;
+  border: none;
   border-radius: 12px;
   overflow: hidden;
   display: flex;
@@ -3437,6 +3437,7 @@ select.app-input {
   aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;
+  border-radius: 12px;
 }
 
 .app-feed-card-ph {
@@ -3447,8 +3448,9 @@ select.app-input {
   justify-content: center;
   background: linear-gradient(135deg, var(--teal-pale), var(--warm-sand));
   color: var(--forest);
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: 700;
+  border-radius: 12px;
 }
 
 /* Delivery / pickup mode tabs above the feed. */
@@ -3463,8 +3465,9 @@ select.app-input {
   background: var(--warm-white);
   color: var(--charcoal);
   border-radius: 999px;
-  padding: 0.45rem 1rem;
+  padding: 0.35rem 0.85rem;
   font: inherit;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -3554,7 +3557,7 @@ select.app-input {
   border: none;
   padding: 0.25rem 0;
   font: inherit;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--charcoal);
   cursor: pointer;
@@ -3578,14 +3581,14 @@ select.app-input {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
   border-radius: 50%;
   border: 1px solid var(--line);
   background: var(--warm-sand);
   color: var(--charcoal);
   font: inherit;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
@@ -3608,15 +3611,19 @@ select.app-input {
   padding: 0 0.2rem;
 }
 
-/* Category chips: pill with emoji + label, wrapping rows. */
+/* Category chips: one scrollable row, like the reference app. */
 .app-category-chips {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
   margin-bottom: 1rem;
+  scrollbar-width: thin;
 }
 
 .app-category-chip {
+  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -3624,9 +3631,11 @@ select.app-input {
   background: var(--warm-white);
   color: var(--charcoal);
   border-radius: 999px;
-  padding: 0.45rem 0.9rem;
+  padding: 0.35rem 0.75rem;
   font: inherit;
+  font-size: 0.85rem;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
 }
 
@@ -3663,68 +3672,89 @@ select.app-input {
   scroll-snap-align: start;
 }
 
-/* Floating search + cart bar pinned to the bottom. */
-.app-bottombar {
+/* Header search: full width, sticky, like the reference app. */
+.app-searchbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--warm-white);
+  padding: 0.5rem 0;
+  margin-bottom: 0.25rem;
+}
+
+.app-searchbar-field {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+}
+
+.app-searchbar-field:focus-within {
+  outline: 2px solid var(--teal-light);
+  outline-offset: 1px;
+  border-color: var(--teal);
+}
+
+.app-searchbar-field .app-input {
+  border: none;
+  padding: 0;
+  font-size: 0.95rem;
+}
+
+.app-searchbar-field .app-input:focus {
+  outline: none;
+  border-color: transparent;
+}
+
+/* Floating cart pill: only rendered when the cart has items. */
+.app-cart-pill {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
   bottom: 1rem;
-  width: min(640px, calc(100% - 2rem));
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  background: var(--warm-white);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 0.5rem;
-  box-shadow: 0 8px 24px rgb(0 0 0 / 0.15);
-  z-index: 50;
-}
-
-.app-bottombar-search {
-  flex: 1;
-  min-width: 0;
-}
-
-.app-bottombar-search .app-input {
-  border: none;
-  border-radius: 999px;
-  width: 100%;
-}
-
-.app-bottombar-cart {
-  flex: 0 0 auto;
   border: none;
   border-radius: 999px;
   background: var(--forest);
   color: var(--warm-white);
-  padding: 0.6rem 1rem;
+  padding: 0.7rem 1.25rem;
   font: inherit;
+  font-size: 0.9rem;
   font-weight: 700;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.2);
   cursor: pointer;
+  z-index: 50;
 }
 
-/* Keep the last section clear of the floating bottom bar. */
+/* Keep the last section clear of the floating cart pill. */
 .app-order {
-  padding-bottom: 7rem;
+  padding-bottom: 4rem;
+}
+
+.app-order .app-lede {
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
 }
 
 .app-feed-card-body {
-  padding: 0.75rem 0.9rem 0.9rem;
+  padding: 0.5rem 0.15rem 0;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.25rem;
   flex: 1;
 }
 
 .app-feed-card-title {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   margin: 0;
 }
 
 .app-feed-card-sub {
   color: var(--charcoal-soft);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   margin: 0;
   flex: 1;
 }

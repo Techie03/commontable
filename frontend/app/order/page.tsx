@@ -678,38 +678,11 @@ function OrderFlow() {
 
   return (
     <div className="app-order">
-      <h1>{firstName ? `Welcome back, ${firstName}` : "Order food"}</h1>
-      <p className="app-lede">
-        Restaurant menu prices, one clear delivery fee, and no hidden markups.
-      </p>
-
       {error && (
         <p className="app-error" role="alert">
           {error}
         </p>
       )}
-
-      {/* Delivery or pickup: sets how the order is fulfilled at checkout. */}
-      <div className="app-mode-tabs" role="tablist" aria-label="Delivery or pickup">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={fulfillment !== "pickup"}
-          className={`app-mode-tab${fulfillment !== "pickup" ? " active" : ""}`}
-          onClick={() => setFulfillment("standard")}
-        >
-          🛵 Delivery
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={fulfillment === "pickup"}
-          className={`app-mode-tab${fulfillment === "pickup" ? " active" : ""}`}
-          onClick={() => setFulfillment("pickup")}
-        >
-          🛍️ Pickup
-        </button>
-      </div>
 
       {/* Top bar: delivery location + profile + cart, like the reference
           app. No bell: there is no notifications system yet. */}
@@ -750,6 +723,44 @@ function OrderFlow() {
             )}
           </button>
         </span>
+      </div>
+
+      {/* Search sits in the header, like the reference app, and stays
+          visible while scrolling. */}
+      <div className="app-searchbar">
+        <label className="app-searchbar-field">
+          <span aria-hidden="true">🔍</span>
+          <span className="app-visually-hidden">Search restaurants</span>
+          <input
+            className="app-input"
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search CommonTable"
+          />
+        </label>
+      </div>
+
+      {/* Delivery or pickup: sets how the order is fulfilled at checkout. */}
+      <div className="app-mode-tabs" role="tablist" aria-label="Delivery or pickup">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={fulfillment !== "pickup"}
+          className={`app-mode-tab${fulfillment !== "pickup" ? " active" : ""}`}
+          onClick={() => setFulfillment("standard")}
+        >
+          🛵 Delivery
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={fulfillment === "pickup"}
+          className={`app-mode-tab${fulfillment === "pickup" ? " active" : ""}`}
+          onClick={() => setFulfillment("pickup")}
+        >
+          🛍️ Pickup
+        </button>
       </div>
 
       {locationNote && (
@@ -1061,31 +1072,22 @@ function OrderFlow() {
         </div>
       )}
 
-      {/* Floating search + cart bar, like the reference app. */}
-      <div className="app-bottombar">
-        <label className="app-bottombar-search">
-          <span className="app-visually-hidden">Search restaurants</span>
-          <input
-            className="app-input"
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search CommonTable"
-          />
-        </label>
+      {/* Floating cart pill, like the reference app: only when the cart
+          has items. Search moved to the header. */}
+      {cartCount > 0 && (
         <button
           type="button"
-          className="app-bottombar-cart"
-          aria-label={`Cart, ${cartCount} items`}
+          className="app-cart-pill"
+          aria-label={`View cart, ${cartCount} items`}
           onClick={() =>
             document
               .getElementById("order-checkout")
               ?.scrollIntoView({ behavior: "smooth" })
           }
         >
-          🛒{cartCount > 0 ? ` ${cartCount}` : ""}
+          🛒 View cart · {cartCount} item{cartCount === 1 ? "" : "s"}
         </button>
-      </div>
+      )}
 
 
       {/* Menu + cart */}
