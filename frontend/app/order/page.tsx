@@ -591,7 +591,10 @@ function OrderFlow() {
     const out: Array<{ order: Order; restaurant?: Restaurant }> = [];
     for (const o of pastOrders) {
       if (o.status !== "COMPLETED" && o.status !== "DELIVERED") continue;
-      if (o.restaurant_id === "1") continue;
+      // Demo Diner never surfaces here. The API returns restaurant_id
+      // as a number, so compare as a string; the name check is backup.
+      if (String(o.restaurant_id) === "1") continue;
+      if (o.restaurant_name === "Demo Diner") continue;
       if (seen.has(o.restaurant_id)) continue;
       seen.add(o.restaurant_id);
       out.push({

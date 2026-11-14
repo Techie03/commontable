@@ -3179,6 +3179,21 @@ select.app-input {
   color: var(--charcoal-soft);
 }
 
+.header-dropdown-section-heading {
+  padding: 0.5rem 0.75rem 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--charcoal-soft);
+}
+
+.header-dropdown-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 0.5rem 0;
+}
+
 /* Landing topbar actions: portals dropdown + sign in, next to the pill */
 .topbar-actions {
   display: flex;

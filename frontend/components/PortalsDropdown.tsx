@@ -1,5 +1,7 @@
-// "Portals" dropdown for the landing page topbar and the app header.
-// Lists every role portal in one place, next to the sign in control.
+// Merged header menu for the landing page topbar and the app header:
+// every role portal plus, for visitors, account creation by role.
+// One dropdown instead of two. The landing page has no auth context,
+// so the caller decides whether the signup section shows.
 
 "use client";
 
@@ -13,6 +15,34 @@ const PORTALS = [
   { href: "/admin", title: "Admin", desc: "Users, roles, zones, pricing, ledger" },
 ];
 
-export default function PortalsDropdown() {
-  return <HeaderDropdown label="Portals" items={PORTALS} />;
+const CREATE_ACCOUNT_ROLES = [
+  {
+    href: "/register?role=customer",
+    title: "Customer",
+    desc: "Order food and track delivery",
+  },
+  {
+    href: "/register?role=restaurant_owner",
+    title: "Restaurant",
+    desc: "Menus, orders, Direct2Door",
+  },
+  {
+    href: "/register?role=driver",
+    title: "Driver",
+    desc: "Deliver orders and earn per trip",
+  },
+];
+
+export default function PortalsDropdown({
+  showSignup = true,
+}: {
+  showSignup?: boolean;
+}) {
+  const sections = [
+    { heading: "Portals", items: PORTALS },
+    ...(showSignup
+      ? [{ heading: "Create an account", items: CREATE_ACCOUNT_ROLES }]
+      : []),
+  ];
+  return <HeaderDropdown label="Portals" sections={sections} />;
 }

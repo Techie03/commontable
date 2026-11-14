@@ -7,26 +7,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import HeaderDropdown from "./HeaderDropdown";
 import PortalsDropdown from "./PortalsDropdown";
-
-const CREATE_ACCOUNT_ROLES = [
-  {
-    href: "/register?role=customer",
-    title: "Customer",
-    desc: "Order food and track delivery",
-  },
-  {
-    href: "/register?role=restaurant_owner",
-    title: "Restaurant",
-    desc: "Menus, orders, Direct2Door",
-  },
-  {
-    href: "/register?role=driver",
-    title: "Driver",
-    desc: "Deliver orders and earn per trip",
-  },
-];
 
 export default function SiteHeader() {
   const { user, ready, logout, hasRole } = useAuth();
@@ -68,7 +49,7 @@ export default function SiteHeader() {
           {isAdmin && <Link href="/admin">Admin</Link>}
         </nav>
         <div className="app-header-user">
-          <PortalsDropdown />
+          <PortalsDropdown showSignup={ready && !user} />
           {ready && user ? (
             <>
               <span className="app-header-email" title={user.email}>
@@ -79,12 +60,9 @@ export default function SiteHeader() {
               </button>
             </>
           ) : ready ? (
-            <>
-              <Link href="/login" className="app-btn app-btn-small app-btn-ghost">
-                Sign in
-              </Link>
-              <HeaderDropdown label="Create account" items={CREATE_ACCOUNT_ROLES} />
-            </>
+            <Link href="/login" className="app-btn app-btn-small app-btn-ghost">
+              Sign in
+            </Link>
           ) : null}
         </div>
       </div>

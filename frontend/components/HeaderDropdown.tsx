@@ -1,7 +1,7 @@
-// Generic header dropdown: a button that opens a small menu of links.
-// Used for the Portals menu and the Create account role menu. Closes on
-// outside click, Escape, or selection. Navigation only, never a security
-// check: the API enforces roles on every endpoint.
+// Generic header dropdown: a button that opens a small menu of links,
+// grouped into labeled sections. Closes on outside click, Escape, or
+// selection. Navigation only, never a security check: the API enforces
+// roles on every endpoint.
 
 "use client";
 
@@ -14,12 +14,17 @@ export type HeaderDropdownItem = {
   desc: string;
 };
 
+export type HeaderDropdownSection = {
+  heading: string;
+  items: HeaderDropdownItem[];
+};
+
 export default function HeaderDropdown({
   label,
-  items,
+  sections,
 }: {
   label: string;
-  items: HeaderDropdownItem[];
+  sections: HeaderDropdownSection[];
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -55,16 +60,30 @@ export default function HeaderDropdown({
       </button>
       {open && (
         <div className="header-dropdown-menu" role="menu">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              role="menuitem"
-              onClick={() => setOpen(false)}
-            >
-              <span className="header-dropdown-item-title">{item.title}</span>
-              <span className="header-dropdown-item-desc">{item.desc}</span>
-            </Link>
+          {sections.map((section, i) => (
+            <div key={section.heading}>
+              {i > 0 && (
+                <div className="header-dropdown-divider" aria-hidden="true" />
+              )}
+              <div className="header-dropdown-section-heading">
+                {section.heading}
+              </div>
+              {section.items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                >
+                  <span className="header-dropdown-item-title">
+                    {item.title}
+                  </span>
+                  <span className="header-dropdown-item-desc">
+                    {item.desc}
+                  </span>
+                </Link>
+              ))}
+            </div>
           ))}
         </div>
       )}
