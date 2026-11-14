@@ -373,6 +373,51 @@ export function createMenuItem(
   return post<MenuItem>(`/api/v1/restaurants/${restaurantId}/menu/items`, body);
 }
 
+export function bulkCreateMenuItems(
+  restaurantId: string,
+  items: {
+    name: string;
+    description?: string;
+    price_cents: number;
+    category?: string;
+    available?: boolean;
+  }[]
+): Promise<MenuItem[]> {
+  return post<MenuItem[]>(
+    `/api/v1/restaurants/${restaurantId}/menu/items/bulk`,
+    { items }
+  );
+}
+
+/** AI menu generation preview. Nothing is saved until bulk add. */
+export type GeneratedMenuItem = {
+  name: string;
+  description?: string | null;
+  price_cents: number;
+  category?: string | null;
+};
+
+export function generateMenu(
+  restaurantId: string,
+  body: { prompt: string; item_count?: number }
+): Promise<{ items: GeneratedMenuItem[] }> {
+  return post<{ items: GeneratedMenuItem[] }>(
+    `/api/v1/restaurants/${restaurantId}/menu/generate`,
+    body
+  );
+}
+
+/** AI food photo for one item: generates, stores, and sets the photo. */
+export function generateMenuItemImage(
+  restaurantId: string,
+  itemId: string
+): Promise<{ image_url: string }> {
+  return post<{ image_url: string }>(
+    `/api/v1/restaurants/${restaurantId}/menu/items/${itemId}/generate-image`,
+    {}
+  );
+}
+
 export function updateMenuItem(
   restaurantId: string,
   itemId: string,
@@ -637,6 +682,10 @@ export function adminListRestaurants(status?: string): Promise<Restaurant[]> {
 
 export function adminApproveRestaurant(id: string): Promise<Restaurant> {
   return post<Restaurant>(`/api/v1/admin/restaurants/${id}/approve`, {});
+}
+
+export function adminSuspendRestaurant(id: string): Promise<Restaurant> {
+  return post<Restaurant>(`/api/v1/admin/restaurants/${id}/suspend`, {});
 }
 
 export function adminApproveDriver(id: string): Promise<unknown> {

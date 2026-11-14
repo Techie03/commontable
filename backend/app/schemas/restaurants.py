@@ -127,6 +127,30 @@ class MenuItemOut(BaseModel):
     modifiers: list[ModifierOut] = []
 
 
+class MenuGenerateIn(BaseModel):
+    prompt: str = Field(min_length=1, max_length=1000)
+    item_count: int = Field(default=12, ge=1, le=40)
+
+
+class GeneratedMenuItemOut(BaseModel):
+    name: str
+    description: str | None = None
+    price_cents: int
+    category: str | None = None
+
+
+class MenuGenerateOut(BaseModel):
+    items: list[GeneratedMenuItemOut]
+
+
+class BulkMenuItemsIn(BaseModel):
+    items: list[MenuItemCreate] = Field(min_length=1, max_length=50)
+
+
+class GenerateImageOut(BaseModel):
+    image_url: str
+
+
 class MenuOut(BaseModel):
     id: int
     name: str

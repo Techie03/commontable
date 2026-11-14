@@ -12,6 +12,7 @@ import StatusBadge from "@/components/StatusBadge";
 import {
   adminApproveDriver,
   adminApproveRestaurant,
+  adminSuspendRestaurant,
   adminCreatePricing,
   adminCreateZone,
   adminGetMetrics,
@@ -559,6 +560,33 @@ function AdminConsole() {
                       }}
                     >
                       Approve
+                    </button>
+                  )}
+                  {r.status !== "suspended" && r.status !== "prospect" && r.status !== "demo" && (
+                    <button
+                      type="button"
+                      className="app-btn app-btn-small app-btn-danger"
+                      disabled={busy === r.id}
+                      onClick={async () => {
+                        if (
+                          !window.confirm(
+                            `Suspend "${r.name}"? It will disappear from every public list and cannot take orders.`
+                          )
+                        )
+                          return;
+                        setBusy(r.id);
+                        setError(null);
+                        try {
+                          await adminSuspendRestaurant(r.id);
+                          await loadTab("restaurants", restaurantFilter);
+                        } catch (err) {
+                          handleError(err);
+                        } finally {
+                          setBusy(null);
+                        }
+                      }}
+                    >
+                      Suspend
                     </button>
                   )}
                 </li>

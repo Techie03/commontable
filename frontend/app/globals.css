@@ -3194,6 +3194,28 @@ select.app-input {
   margin: 0.5rem 0;
 }
 
+/* AI menu preview rows: name + price + remove, then description + category. */
+.app-ai-preview-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 6rem 2.5rem;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--line);
+  align-items: center;
+}
+
+.app-ai-preview-row .app-ai-name {
+  grid-column: span 2;
+}
+
+.app-ai-preview-row .app-ai-desc {
+  grid-column: span 2;
+}
+
+.app-ai-preview-row .app-ai-category {
+  grid-column: span 2;
+}
+
 /* Landing topbar actions: portals dropdown + sign in, next to the pill */
 .topbar-actions {
   display: flex;

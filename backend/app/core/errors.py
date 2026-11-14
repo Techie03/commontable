@@ -33,3 +33,11 @@ def conflict(message: str, code: str = "conflict") -> ApiError:
 
 def unprocessable(message: str) -> ApiError:
     return ApiError(422, "unprocessable", message)
+
+
+def bad_gateway(message: str) -> ApiError:
+    return ApiError(502, "bad_gateway", message)
+
+
+def service_unavailable(message: str, code: str = "service_unavailable") -> ApiError:
+    return ApiError(503, code, message)

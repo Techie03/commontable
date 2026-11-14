@@ -37,5 +37,15 @@ class Settings(BaseSettings):
     payment_api_key: str = ""
     payment_webhook_secret: str = ""
 
+    # AI menu features: text menu generation and food photo generation.
+    # All optional — the menu page degrades to manual entry when no key
+    # is set. Photos are stored in Supabase Storage (public bucket).
+    openai_api_key: str | None = None
+    openai_text_model: str = "gpt-4o-mini"
+    openai_image_model: str = "gpt-image-1"
+    supabase_url: str | None = None
+    supabase_service_key: str | None = None
+    menu_image_bucket: str = "menu-images"
+
 
 settings = Settings()

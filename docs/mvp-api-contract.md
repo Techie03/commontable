@@ -75,7 +75,10 @@ PLACED → ACCEPTED → PREPARING → READY → ASSIGNED → PICKED_UP → DELIV
 | `POST /api/v1/restaurants` | owner, admin | Creates a `pending` restaurant. |
 | `PATCH /api/v1/restaurants/{id}` | owner/manager of it, admin | |
 | `POST /api/v1/restaurants/{id}/locations` | owner/manager, admin | |
-| `POST /api/v1/restaurants/{id}/menu/items` | owner/manager, admin | |
+| `POST /api/v1/restaurants/{id}/menu/items` | owner/manager, admin | Creates the restaurant's "Main Menu" when it has no active menu yet, so the first item always works. |
+| `POST /api/v1/restaurants/{id}/menu/items/bulk` | owner/manager, admin | Add up to 50 items at once (AI preview, imports). Same menu auto-creation. |
+| `POST /api/v1/restaurants/{id}/menu/generate` | owner/manager, admin | AI menu draft (OpenAI chat, JSON mode): `{prompt, item_count}` → preview items, nothing saved. 503 when no OpenAI key is configured. |
+| `POST /api/v1/restaurants/{id}/menu/items/{item_id}/generate-image` | owner/manager, admin | AI food photo (OpenAI image): generates, stores in Supabase Storage (public `menu-images` bucket), sets `image_url`. 503 when the OpenAI key or Supabase storage is not configured. |
 | `PATCH /api/v1/restaurants/{id}/menu/items/{item_id}` | owner/manager (all fields); staff (availability only); admin | |
 | `DELETE /api/v1/restaurants/{id}/menu/items/{item_id}` | owner/manager, admin | Blocked by the DB if the item is on any order. |
 | `GET /api/v1/restaurants/{id}/orders` | staff of it, admin | Restaurant order queue + history. |
@@ -133,6 +136,7 @@ PLACED → ACCEPTED → PREPARING → READY → ASSIGNED → PICKED_UP → DELIV
 | `GET /api/v1/admin/metrics` | admin | Basic metrics: orders by status, orders today, revenue (fees) today, avg prep, on-time proxy. No invented data; all derived from real rows. |
 | `GET /api/v1/admin/support` / `PATCH /api/v1/admin/support/{id}` | admin | Support tickets list + resolve. |
 | `POST /api/v1/admin/restaurants/{id}/approve` | admin | pending → active. |
+| `POST /api/v1/admin/restaurants/{id}/suspend` | admin | any status → suspended. Suspended restaurants are invisible in every public list and cannot take orders. |
 | `POST /api/v1/admin/drivers/{id}/approve` | admin | Driver onboarding approval. |
 
 ### Notifications

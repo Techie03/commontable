@@ -25,7 +25,12 @@ from app.models.payments import (
     LedgerEntry,
     PricingRule,
 )
-from app.models.restaurants import RESTAURANT_STATUSES, STATUS_ACTIVE, Restaurant
+from app.models.restaurants import (
+    RESTAURANT_STATUSES,
+    STATUS_ACTIVE,
+    STATUS_SUSPENDED,
+    Restaurant,
+)
 from app.schemas.auth import UserOut, user_to_out
 from app.schemas.orders import (
     LedgerEntryOut,
@@ -175,6 +180,26 @@ def approve_restaurant(
         raise not_found("Restaurant not found")
     restaurant.status = STATUS_ACTIVE
     restaurant.onboarding_approved_at = utcnow()
+    db.commit()
+    db.refresh(restaurant)
+    return restaurant_to_out(restaurant)
+
+
+@router.post("/restaurants/{restaurant_id}/suspend")
+def suspend_restaurant(
+    restaurant_id: int,
+    user: User = Depends(AdminUser),
+    db: Session = Depends(get_db),
+):
+    """Take a restaurant off the platform. Suspended restaurants are
+    invisible in every public list and cannot take orders; the owner
+    keeps dashboard access to their own data."""
+    from app.schemas.restaurants import restaurant_to_out
+
+    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+    if restaurant is None:
+        raise not_found("Restaurant not found")
+    restaurant.status = STATUS_SUSPENDED
     db.commit()
     db.refresh(restaurant)
     return restaurant_to_out(restaurant)

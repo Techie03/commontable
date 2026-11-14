@@ -10,7 +10,14 @@ from app.core.deps import (
     is_admin,
     require_restaurant_access,
 )
-from app.core.errors import bad_request, conflict, forbidden, not_found
+from app.core.errors import (
+    bad_gateway,
+    bad_request,
+    conflict,
+    forbidden,
+    not_found,
+    service_unavailable,
+)
 from app.db.session import get_db
 from app.models.geo import Address, ServiceZone
 from app.models.identity import (
@@ -36,7 +43,12 @@ from app.models.restaurants import (
 )
 from app.schemas.orders import OrderOut, order_to_out
 from app.schemas.restaurants import (
+    BulkMenuItemsIn,
+    GenerateImageOut,
+    GeneratedMenuItemOut,
     LocationIn,
+    MenuGenerateIn,
+    MenuGenerateOut,
     MenuItemCreate,
     MenuItemOut,
     MenuItemUpdate,
@@ -48,8 +60,58 @@ from app.schemas.restaurants import (
     menu_item_to_out,
     restaurant_to_out,
 )
+from app.services.ai_menu import (
+    AIServiceError,
+    generate_food_image,
+    generate_menu_items,
+    slugify,
+    upload_menu_image,
+)
 
 router = APIRouter(prefix="/restaurants", tags=["restaurants"])
+
+
+def _get_or_create_active_menu(db: Session, restaurant: Restaurant) -> Menu:
+    """The restaurant's active menu, creating a default one when the
+    restaurant has none yet. A new restaurant must be able to take its
+    first item without a separate menu-creation step."""
+    menu = (
+        db.query(Menu)
+        .filter(Menu.restaurant_id == restaurant.id, Menu.active.is_(True))
+        .first()
+    )
+    if menu is None:
+        menu = Menu(restaurant_id=restaurant.id, name="Main Menu", active=True)
+        db.add(menu)
+        db.flush()
+    return menu
+
+
+def _create_menu_item_row(
+    db: Session, menu: Menu, body: MenuItemCreate
+) -> MenuItem:
+    item = MenuItem(
+        menu_id=menu.id,
+        name=body.name,
+        description=body.description,
+        price_cents=body.price_cents,
+        category=body.category,
+        available=body.available,
+        image_url=body.image_url,
+    )
+    db.add(item)
+    db.flush()
+    for mod in body.modifiers:
+        db.add(
+            Modifier(
+                menu_item_id=item.id,
+                name=mod.name,
+                price_delta_cents=mod.price_delta_cents,
+                required=mod.required,
+                max_selections=mod.max_selections,
+            )
+        )
+    return item
 
 
 def _paginate(query, page: int, page_size: int):
@@ -408,37 +470,112 @@ def create_menu_item(
         if menu is None:
             raise bad_request("Menu not found for this restaurant")
     else:
-        menu = (
-            db.query(Menu)
-            .filter(Menu.restaurant_id == restaurant.id, Menu.active.is_(True))
-            .first()
-        )
-        if menu is None:
-            raise bad_request("This restaurant has no active menu yet")
-    item = MenuItem(
-        menu_id=menu.id,
-        name=body.name,
-        description=body.description,
-        price_cents=body.price_cents,
-        category=body.category,
-        available=body.available,
-        image_url=body.image_url,
-    )
-    db.add(item)
-    db.flush()
-    for mod in body.modifiers:
-        db.add(
-            Modifier(
-                menu_item_id=item.id,
-                name=mod.name,
-                price_delta_cents=mod.price_delta_cents,
-                required=mod.required,
-                max_selections=mod.max_selections,
-            )
-        )
+        menu = _get_or_create_active_menu(db, restaurant)
+    item = _create_menu_item_row(db, menu, body)
     db.commit()
     db.refresh(item)
     return menu_item_to_out(item)
+
+
+@router.post(
+    "/{restaurant_id}/menu/items/bulk",
+    response_model=list[MenuItemOut],
+    status_code=201,
+)
+def bulk_create_menu_items(
+    restaurant_id: int,
+    body: BulkMenuItemsIn,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Add many items at once (AI generation preview, imports). All items
+    go on the active menu, created when the restaurant has none yet."""
+    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+    if restaurant is None:
+        raise not_found("Restaurant not found")
+    require_restaurant_access(
+        restaurant_id, user, [ROLE_RESTAURANT_OWNER, ROLE_RESTAURANT_MANAGER]
+    )
+    menu = _get_or_create_active_menu(db, restaurant)
+    items = [_create_menu_item_row(db, menu, b) for b in body.items]
+    db.commit()
+    for item in items:
+        db.refresh(item)
+    return [menu_item_to_out(item) for item in items]
+
+
+@router.post("/{restaurant_id}/menu/generate", response_model=MenuGenerateOut)
+def generate_menu(
+    restaurant_id: int,
+    body: MenuGenerateIn,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """AI menu generation: returns a preview list of items for the
+    owner's brief. Nothing is saved; the owner reviews, edits, and adds
+    the items they want via the bulk endpoint."""
+    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+    if restaurant is None:
+        raise not_found("Restaurant not found")
+    require_restaurant_access(
+        restaurant_id, user, [ROLE_RESTAURANT_OWNER, ROLE_RESTAURANT_MANAGER]
+    )
+    try:
+        items = generate_menu_items(
+            restaurant_name=restaurant.name,
+            prompt=body.prompt,
+            item_count=body.item_count,
+        )
+    except AIServiceError as err:
+        if err.not_configured:
+            raise service_unavailable(str(err)) from err
+        raise bad_gateway(str(err)) from err
+    return MenuGenerateOut(
+        items=[GeneratedMenuItemOut(**item) for item in items]
+    )
+
+
+@router.post(
+    "/{restaurant_id}/menu/items/{item_id}/generate-image",
+    response_model=GenerateImageOut,
+)
+def generate_item_image(
+    restaurant_id: int,
+    item_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """AI food photo for one menu item: generates the image, stores it,
+    and sets it as the item's photo."""
+    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+    if restaurant is None:
+        raise not_found("Restaurant not found")
+    require_restaurant_access(
+        restaurant_id, user, [ROLE_RESTAURANT_OWNER, ROLE_RESTAURANT_MANAGER]
+    )
+    item = (
+        db.query(MenuItem)
+        .join(Menu, Menu.id == MenuItem.menu_id)
+        .filter(MenuItem.id == item_id, Menu.restaurant_id == restaurant.id)
+        .first()
+    )
+    if item is None:
+        raise not_found("Menu item not found")
+    try:
+        image_bytes = generate_food_image(
+            name=item.name, description=item.description
+        )
+        image_url = upload_menu_image(
+            image_bytes=image_bytes,
+            filename=f"{slugify(item.name)}.png",
+        )
+    except AIServiceError as err:
+        if err.not_configured:
+            raise service_unavailable(str(err)) from err
+        raise bad_gateway(str(err)) from err
+    item.image_url = image_url
+    db.commit()
+    return GenerateImageOut(image_url=image_url)
 
 
 @router.patch("/{restaurant_id}/menu/items/{item_id}", response_model=MenuItemOut)
