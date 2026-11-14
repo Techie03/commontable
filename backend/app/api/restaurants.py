@@ -108,16 +108,21 @@ def list_coming_soon(
     page_size: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
-    """Public directory of prospect (census, unclaimed) restaurants.
+    """Public coming-soon directory: prospect (census, unclaimed)
+    restaurants plus pending restaurants (owners who registered and are
+    awaiting approval).
 
-    Read-only discovery only: these restaurants have NOT joined
-    CommonTable and are NOT orderable. They are listed as coming soon,
-    never presented as partners. Must stay above the /{restaurant_id}
-    route or FastAPI matches "coming-soon" as an id.
+    Read-only discovery only: nothing here is orderable. Prospects have
+    NOT joined CommonTable and are never presented as partners. Pending
+    restaurants HAVE joined; they show with no menu link until approved.
+    A pending restaurant with no location yet shows for every postal
+    code: it registered into the pilot, so it belongs in the pilot's
+    directory. Must stay above the /{restaurant_id} route or FastAPI
+    matches "coming-soon" as an id.
     """
     restaurants = (
         db.query(Restaurant)
-        .filter(Restaurant.status == STATUS_PROSPECT)
+        .filter(Restaurant.status.in_([STATUS_PROSPECT, STATUS_PENDING]))
         .order_by(Restaurant.name)
         .all()
     )
@@ -125,7 +130,8 @@ def list_coming_soon(
         restaurants = [
             r
             for r in restaurants
-            if any(
+            if (r.status == STATUS_PENDING and not r.locations)
+            or any(
                 loc.address is not None
                 and loc.address.postal_code == postal_code
                 for loc in r.locations
@@ -164,7 +170,12 @@ def list_coming_soon(
     items = []
     for r in sliced:
         d = restaurant_to_out(r).model_dump()
-        d["has_menu"] = r.id in menu_restaurant_ids
+        # Only prospects link to a collected menu: the browse-menu page
+        # is prospect-only, and a pending restaurant's own menu is not
+        # public until it is approved.
+        d["has_menu"] = (
+            r.status == STATUS_PROSPECT and r.id in menu_restaurant_ids
+        )
         d["card_image_url"] = card_images.get(r.id)
         items.append(d)
     return {

@@ -356,12 +356,17 @@ function OrderFlow() {
     setShowAllComingSoon(false);
     try {
       const all = await listRestaurants(postalCode);
-      // Prospects are never orderable. The API must not return them here;
-      // filter defensively so a prospect can never reach the customer.
-      setRestaurants(all.filter((r) => r.status !== "prospect"));
-      // Coming soon: real Denton restaurants that have not joined yet.
-      // Read-only directory, never orderable. Load every page so "Show
-      // all" truly shows all of them, not just the first 100.
+      // Only active restaurants may serve. The API must not return
+      // anything else here; filter defensively so a prospect or a
+      // pending restaurant can never reach the customer as serving.
+      setRestaurants(
+        all.filter((r) => r.status !== "prospect" && r.status !== "pending")
+      );
+      // Coming soon: Denton restaurants not serving yet — census
+      // prospects that have not joined, plus registered restaurants
+      // awaiting approval. Read-only directory, never orderable. Load
+      // every page so "Show all" truly shows all of them, not just the
+      // first 100.
       const soon = await listAllComingSoonRestaurants(postalCode);
       setComingSoon(soon.items);
       setComingSoonTotal(soon.total);
@@ -896,9 +901,8 @@ function OrderFlow() {
               <p className="app-lede">
                 {comingSoonTotal} local restaurant
                 {comingSoonTotal === 1 ? "" : "s"} near{" "}
-                {address.postal_code.trim()}{" "}
-                {comingSoonTotal === 1 ? "has" : "have"} not joined CommonTable
-                yet. Ordering opens as each one comes on board.
+                {address.postal_code.trim()} are coming soon. Ordering opens
+                as each one comes on board.
               </p>
               <div className="app-feed-grid">
                 {soonShown.map((r) => (
@@ -907,7 +911,11 @@ function OrderFlow() {
                     r={r}
                     footer={
                       <span className="app-feed-card-actions">
-                        <span className="app-tag app-tag-muted">Coming soon</span>
+                        <span className="app-tag app-tag-muted">
+                          {r.status === "pending"
+                            ? "Recently joined"
+                            : "Coming soon"}
+                        </span>
                         {r.has_menu && (
                           <Link
                             href={`/menu/${r.id}`}

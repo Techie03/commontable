@@ -6,10 +6,11 @@ from sqlalchemy.orm import relationship
 from app.db.session import Base
 from app.models.common import utc_datetime, utcnow
 
-# Restaurant status (contract section 7). Only "active" is visible to
-# customers; "demo" is internal test data, invisible publicly;
+# Restaurant status (contract section 7). Only "active" is orderable and
+# listed as serving; "demo" is internal test data, invisible publicly;
 # "prospect" restaurants are census data, unclaimed, never orderable,
-# and never presented as partners.
+# and never presented as partners; "pending" restaurants registered and
+# await approval — visible in the coming-soon directory, never orderable.
 STATUS_PROSPECT = "prospect"
 STATUS_PENDING = "pending"
 STATUS_ACTIVE = "active"
