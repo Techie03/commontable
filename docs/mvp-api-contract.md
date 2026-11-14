@@ -72,7 +72,7 @@ PLACED → ACCEPTED → PREPARING → READY → ASSIGNED → PICKED_UP → DELIV
 | `GET /api/v1/restaurants/{id}/browse-menu` | public | Browse-only menu for a **prospect** restaurant (pilot menus collected from the restaurant's own published menu). Returns `browse_only: true`. 404 for any non-prospect. Items with `price_cents` 0 have no published price; the UI shows "Price not listed". Nothing here is orderable: `place_order` rejects non-orderable statuses. |
 | `GET /api/v1/restaurants/coming-soon?postal_code=&page=&page_size=` | public | Coming-soon directory, name order, paginated (`page_size` max 100): census prospects plus pending restaurants (owners who registered, awaiting approval). A pending restaurant with no location yet shows for every postal code. Each item carries `has_menu` (a collected pilot menu exists; always false for pending — browse-menu is prospect-only) and `card_image_url` (first menu item photo, null otherwise) for feed cards. |
 | `GET /api/v1/admin/restaurants?status=` | admin | All restaurants incl. prospects, filterable by status. |
-| `POST /api/v1/restaurants` | owner, admin | Creates a `pending` restaurant. |
+| `POST /api/v1/restaurants` | owner, admin | Creates a `pending` restaurant. Requires verification evidence: owner name, business phone, business address (website/listing optional). No evidence → 422. |
 | `PATCH /api/v1/restaurants/{id}` | owner/manager of it, admin | |
 | `POST /api/v1/restaurants/{id}/locations` | owner/manager, admin | |
 | `POST /api/v1/restaurants/{id}/menu/items` | owner/manager, admin | Creates the restaurant's "Main Menu" when it has no active menu yet, so the first item always works. |
@@ -135,7 +135,8 @@ PLACED → ACCEPTED → PREPARING → READY → ASSIGNED → PICKED_UP → DELIV
 | `GET /api/v1/admin/pricing` / `POST` / `PATCH /api/v1/admin/pricing/{id}` | admin | Pricing rules by zone (see §5). |
 | `GET /api/v1/admin/metrics` | admin | Basic metrics: orders by status, orders today, revenue (fees) today, avg prep, on-time proxy. No invented data; all derived from real rows. |
 | `GET /api/v1/admin/support` / `PATCH /api/v1/admin/support/{id}` | admin | Support tickets list + resolve. |
-| `POST /api/v1/admin/restaurants/{id}/approve` | admin | pending → active. |
+| `POST /api/v1/admin/restaurants/{id}/verify` | admin | Marks the restaurant verified after the admin checks the signup evidence against a public listing. Sets `verification_status`, `verified_at`, optional notes. |
+| `POST /api/v1/admin/restaurants/{id}/approve` | admin | pending → active. Requires `verification_status` = verified (400 otherwise). |
 | `POST /api/v1/admin/restaurants/{id}/suspend` | admin | any status → suspended. Suspended restaurants are invisible in every public list and cannot take orders. |
 | `POST /api/v1/admin/drivers/{id}/approve` | admin | Driver onboarding approval. |
 

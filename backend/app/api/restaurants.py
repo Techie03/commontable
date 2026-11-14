@@ -360,7 +360,9 @@ def create_restaurant(
     db: Session = Depends(get_db),
 ):
     """Onboarding application. Creates a pending restaurant and grants the
-    creator the restaurant_owner role scoped to it."""
+    creator the restaurant_owner role scoped to it. Verification evidence
+    (owner, phone, address) is required; an admin checks it before the
+    restaurant can be approved and take orders."""
     restaurant = Restaurant(
         owner_user_id=user.id,
         name=body.name,
@@ -371,6 +373,8 @@ def create_restaurant(
         status=STATUS_PENDING,
         direct2door_enabled=body.direct2door_enabled,
         website=body.website,
+        owner_name=body.owner_name,
+        business_address=body.business_address,
         source="manual",
     )
     db.add(restaurant)

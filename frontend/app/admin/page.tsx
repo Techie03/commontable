@@ -13,6 +13,7 @@ import {
   adminApproveDriver,
   adminApproveRestaurant,
   adminSuspendRestaurant,
+  adminVerifyRestaurant,
   adminCreatePricing,
   adminCreateZone,
   adminGetMetrics,
@@ -540,28 +541,85 @@ function AdminConsole() {
                         <span className="app-tag">Demo restaurant</span>
                       )}
                     </span>
+                    {r.source === "manual" && (
+                      <span className="app-list-sub">
+                        Owner: {r.owner_name ?? "—"} · Phone: {r.phone ?? "—"}
+                      </span>
+                    )}
+                    {r.source === "manual" && r.business_address && (
+                      <span className="app-list-sub">
+                        {r.business_address}
+                      </span>
+                    )}
+                    {r.source === "manual" && r.website && (
+                      <span className="app-list-sub">
+                        <a href={r.website} target="_blank" rel="noreferrer">
+                          {r.website}
+                        </a>
+                      </span>
+                    )}
+                    {r.source === "manual" && (
+                      <span className="app-list-sub">
+                        Verification: {r.verification_status ?? "unverified"}
+                        {r.verification_status === "verified" && (
+                          <span className="app-tag">Verified</span>
+                        )}
+                        {r.verification_notes
+                          ? ` — ${r.verification_notes}`
+                          : ""}
+                      </span>
+                    )}
                   </span>
-                  {r.status === "pending" && (
-                    <button
-                      type="button"
-                      className="app-btn app-btn-small"
-                      disabled={busy === r.id}
-                      onClick={async () => {
-                        setBusy(r.id);
-                        setError(null);
-                        try {
-                          await adminApproveRestaurant(r.id);
-                          await loadTab("restaurants", restaurantFilter);
-                        } catch (err) {
-                          handleError(err);
-                        } finally {
-                          setBusy(null);
-                        }
-                      }}
-                    >
-                      Approve
-                    </button>
-                  )}
+                  {r.status === "pending" &&
+                    r.verification_status !== "verified" && (
+                      <button
+                        type="button"
+                        className="app-btn app-btn-small"
+                        disabled={busy === r.id}
+                        onClick={async () => {
+                          if (
+                            !window.confirm(
+                              `Verify "${r.name}"? This confirms you checked the owner, business phone, and business address against a public listing.`
+                            )
+                          )
+                            return;
+                          setBusy(r.id);
+                          setError(null);
+                          try {
+                            await adminVerifyRestaurant(r.id);
+                            await loadTab("restaurants", restaurantFilter);
+                          } catch (err) {
+                            handleError(err);
+                          } finally {
+                            setBusy(null);
+                          }
+                        }}
+                      >
+                        Verify
+                      </button>
+                    )}
+                  {r.status === "pending" &&
+                    r.verification_status === "verified" && (
+                      <button
+                        type="button"
+                        className="app-btn app-btn-small"
+                        disabled={busy === r.id}
+                        onClick={async () => {
+                          setBusy(r.id);
+                          setError(null);
+                          try {
+                            await adminApproveRestaurant(r.id);
+                            await loadTab("restaurants", restaurantFilter);
+                          } catch (err) {
+                            handleError(err);
+                          } finally {
+                            setBusy(null);
+                          }
+                        }}
+                      >
+                        Approve
+                      </button>
+                    )}
                   {r.status !== "suspended" && r.status !== "prospect" && r.status !== "demo" && (
                     <button
                       type="button"

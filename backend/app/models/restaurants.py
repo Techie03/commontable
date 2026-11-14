@@ -17,6 +17,15 @@ STATUS_ACTIVE = "active"
 STATUS_SUSPENDED = "suspended"
 STATUS_DEMO = "demo"
 
+# Verification status (contract section 7). A restaurant may only be
+# approved (go live, take orders) after an admin verifies it is a real
+# operating business: owner identity, business phone, and business
+# address collected at signup and checked against a public listing or
+# website before approval. Unverified restaurants can never take orders
+# or receive money.
+VERIFICATION_UNVERIFIED = "unverified"
+VERIFICATION_VERIFIED = "verified"
+
 RESTAURANT_STATUSES = [
     STATUS_PROSPECT,
     STATUS_PENDING,
@@ -67,6 +76,16 @@ class Restaurant(Base):
     rating_count = Column(Integer, nullable=True)
     maps_search_url = Column(String(1000), nullable=True)
     website = Column(String(1000), nullable=True)
+
+    # Verification evidence, collected at signup and checked by an admin
+    # before approval. Census/seed rows have none (never approved).
+    owner_name = Column(String(255), nullable=True)
+    business_address = Column(String(500), nullable=True)
+    verification_status = Column(
+        String(20), nullable=False, default=VERIFICATION_UNVERIFIED
+    )
+    verification_notes = Column(String(2000), nullable=True)
+    verified_at = Column(utc_datetime, nullable=True)
 
     locations = relationship("RestaurantLocation", back_populates="restaurant", cascade="all, delete-orphan")
     menus = relationship("Menu", back_populates="restaurant", cascade="all, delete-orphan")

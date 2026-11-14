@@ -29,9 +29,11 @@ from app.models.restaurants import (
     RESTAURANT_STATUSES,
     STATUS_ACTIVE,
     STATUS_SUSPENDED,
+    VERIFICATION_VERIFIED,
     Restaurant,
 )
 from app.schemas.auth import UserOut, user_to_out
+from app.schemas.restaurants import RestaurantVerifyIn
 from app.schemas.orders import (
     LedgerEntryOut,
     PricingRuleCreate,
@@ -178,8 +180,38 @@ def approve_restaurant(
     restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
     if restaurant is None:
         raise not_found("Restaurant not found")
+    if restaurant.verification_status != VERIFICATION_VERIFIED:
+        raise bad_request(
+            "Verify this restaurant before approving it: check the owner, "
+            "business phone, and business address against a public listing."
+        )
     restaurant.status = STATUS_ACTIVE
     restaurant.onboarding_approved_at = utcnow()
+    db.commit()
+    db.refresh(restaurant)
+    return restaurant_to_out(restaurant)
+
+
+@router.post("/restaurants/{restaurant_id}/verify")
+def verify_restaurant(
+    restaurant_id: int,
+    body: RestaurantVerifyIn | None = None,
+    user: User = Depends(AdminUser),
+    db: Session = Depends(get_db),
+):
+    """Mark a restaurant verified: the admin has checked the signup
+    evidence (owner, business phone, business address) against a public
+    listing or website. Verification is required before approval."""
+    from app.models.common import utcnow
+    from app.schemas.restaurants import restaurant_to_out
+
+    restaurant = db.query(Restaurant).filter(Restaurant.id == restaurant_id).first()
+    if restaurant is None:
+        raise not_found("Restaurant not found")
+    restaurant.verification_status = VERIFICATION_VERIFIED
+    restaurant.verified_at = utcnow()
+    if body is not None and body.notes is not None:
+        restaurant.verification_notes = body.notes
     db.commit()
     db.refresh(restaurant)
     return restaurant_to_out(restaurant)

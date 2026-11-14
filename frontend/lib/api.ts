@@ -338,10 +338,12 @@ export function createRestaurant(body: {
   name: string;
   brand_name?: string;
   description?: string;
-  phone?: string;
+  phone: string;
   email?: string;
   website?: string;
   direct2door_enabled?: boolean;
+  owner_name: string;
+  business_address: string;
 }): Promise<Restaurant> {
   return post<Restaurant>("/api/v1/restaurants", body);
 }
@@ -686,6 +688,15 @@ export function adminApproveRestaurant(id: string): Promise<Restaurant> {
 
 export function adminSuspendRestaurant(id: string): Promise<Restaurant> {
   return post<Restaurant>(`/api/v1/admin/restaurants/${id}/suspend`, {});
+}
+
+export function adminVerifyRestaurant(
+  id: string,
+  notes?: string
+): Promise<Restaurant> {
+  return post<Restaurant>(`/api/v1/admin/restaurants/${id}/verify`, {
+    notes: notes ?? null,
+  });
 }
 
 export function adminApproveDriver(id: string): Promise<unknown> {

@@ -45,10 +45,15 @@ class RestaurantCreate(BaseModel):
     name: str = Field(min_length=1, max_length=255)
     brand_name: str | None = None
     description: str | None = None
-    phone: str | None = None
+    phone: str = Field(min_length=1, max_length=50)
     email: str | None = None
     direct2door_enabled: bool = False
     website: str | None = None
+    # Verification evidence: a restaurant cannot be created without a
+    # named owner, a business phone, and a business address. An admin
+    # checks these against a public listing before approval.
+    owner_name: str = Field(min_length=1, max_length=255)
+    business_address: str = Field(min_length=1, max_length=500)
 
 
 class RestaurantUpdate(BaseModel):
@@ -59,6 +64,12 @@ class RestaurantUpdate(BaseModel):
     email: str | None = None
     direct2door_enabled: bool | None = None
     website: str | None = None
+    owner_name: str | None = None
+    business_address: str | None = None
+
+
+class RestaurantVerifyIn(BaseModel):
+    notes: str | None = Field(default=None, max_length=2000)
 
 
 class RestaurantOut(BaseModel):
@@ -76,6 +87,11 @@ class RestaurantOut(BaseModel):
     price_level: int | None = None
     rating_avg: float | None = None
     rating_count: int | None = None
+    owner_name: str | None = None
+    business_address: str | None = None
+    verification_status: str = "unverified"
+    verification_notes: str | None = None
+    verified_at: datetime | None = None
     locations: list[LocationOut] = []
     created_at: datetime | None = None
 
@@ -200,6 +216,11 @@ def restaurant_to_out(restaurant) -> RestaurantOut:
         price_level=restaurant.price_level,
         rating_avg=restaurant.rating_avg,
         rating_count=restaurant.rating_count,
+        owner_name=restaurant.owner_name,
+        business_address=restaurant.business_address,
+        verification_status=restaurant.verification_status,
+        verification_notes=restaurant.verification_notes,
+        verified_at=restaurant.verified_at,
         locations=[location_to_out(loc) for loc in restaurant.locations],
         created_at=restaurant.created_at,
     )

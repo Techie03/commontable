@@ -459,6 +459,14 @@ export default function Home() {
             CommonTable is in development. Prices on this page are planning
             hypotheses, not final prices.
           </p>
+          <p>
+            <a href="/privacy">Privacy Policy</a>
+            {" · "}
+            <a href="/terms">Terms of Service</a>
+            {" · "}
+            <a href="/copyright">Copyright</a>
+          </p>
+          <p>© 2026 CommonTable. All rights reserved.</p>
         </div>
       </footer>
     </main>

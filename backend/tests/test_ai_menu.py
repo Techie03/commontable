@@ -7,7 +7,14 @@ from tests.conftest import demo_headers
 
 def _make_restaurant(client, admin, name="New Test Diner"):
     res = client.post(
-        "/api/v1/restaurants", json={"name": name}, headers=admin
+        "/api/v1/restaurants",
+        json={
+            "name": name,
+            "phone": "(940) 555-0100",
+            "owner_name": "Test Owner",
+            "business_address": "1 Test St, Denton, TX 76201",
+        },
+        headers=admin,
     )
     assert res.status_code == 201, res.text
     return res.json()

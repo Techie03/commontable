@@ -98,6 +98,13 @@ export interface Restaurant {
   website?: string | null;
   phone?: string | null;
   maps_search_url?: string | null;
+  /** Verification evidence, collected at signup. */
+  owner_name?: string | null;
+  business_address?: string | null;
+  /** "unverified" | "verified". Approval requires "verified". */
+  verification_status?: string | null;
+  verification_notes?: string | null;
+  verified_at?: string | null;
   locations?: RestaurantLocation[];
   location?: RestaurantLocation | null;
   address?: string | RestaurantAddressObject;

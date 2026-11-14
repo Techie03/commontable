@@ -234,12 +234,19 @@ def test_rbac_customer_cannot_read_another_customers_order(client, seeded):
 def test_rbac_staff_cannot_see_another_restaurants_orders(client, seeded):
     admin = demo_headers(client, "admin")
     staff = demo_headers(client, "staff")
-    # Admin creates a second restaurant (pending -> approved) with its own order.
+    # Admin creates a second restaurant (pending -> verified -> approved)
+    # with its own order.
     second = client.post(
         "/api/v1/restaurants",
-        json={"name": "Second Diner", "phone": "(940) 555-0200"},
+        json={
+            "name": "Second Diner",
+            "phone": "(940) 555-0200",
+            "owner_name": "Second Owner",
+            "business_address": "2 Test St, Denton, TX 76201",
+        },
         headers=admin,
     ).json()
+    client.post(f"/api/v1/admin/restaurants/{second['id']}/verify", headers=admin)
     client.post(f"/api/v1/admin/restaurants/{second['id']}/approve", headers=admin)
     # Demo Diner staff have no role at the second restaurant.
     assert (

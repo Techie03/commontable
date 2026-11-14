@@ -52,6 +52,8 @@ function RestaurantDashboard() {
   const [createEmail, setCreateEmail] = useState("");
   const [createWebsite, setCreateWebsite] = useState("");
   const [createDescription, setCreateDescription] = useState("");
+  const [createOwnerName, setCreateOwnerName] = useState("");
+  const [createAddress, setCreateAddress] = useState("");
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
@@ -184,15 +186,26 @@ function RestaurantDashboard() {
       setCreateError("Give your restaurant a name.");
       return;
     }
+    const ownerName = createOwnerName.trim();
+    const phone = createPhone.trim();
+    const address = createAddress.trim();
+    if (!ownerName || !phone || !address) {
+      setCreateError(
+        "Owner name, business phone, and business address are required. We verify every restaurant before it can take orders."
+      );
+      return;
+    }
     setCreating(true);
     setCreateError(null);
     try {
       const created = await createRestaurant({
         name,
-        phone: createPhone.trim() || undefined,
+        phone,
         email: createEmail.trim() || undefined,
         website: createWebsite.trim() || undefined,
         description: createDescription.trim() || undefined,
+        owner_name: ownerName,
+        business_address: address,
       });
       const id = String(created.id);
       setManualId(id);
@@ -243,7 +256,9 @@ function RestaurantDashboard() {
           <h2>Set up your restaurant</h2>
           <p className="app-muted">
             Your restaurant is created as pending. You can set up your menu
-            right away; it starts taking orders once it is approved.
+            right away. Before it can take orders, we verify it is a real
+            operating business — owner, business phone, and business address
+            are checked against a public listing.
           </p>
           <form onSubmit={handleCreate}>
             <label className="app-field">
@@ -258,13 +273,36 @@ function RestaurantDashboard() {
               />
             </label>
             <label className="app-field">
-              <span>Phone (optional)</span>
+              <span>Owner name</span>
+              <input
+                className="app-input"
+                type="text"
+                required
+                value={createOwnerName}
+                onChange={(e) => setCreateOwnerName(e.target.value)}
+                placeholder="The owner's full name"
+              />
+            </label>
+            <label className="app-field">
+              <span>Business phone</span>
               <input
                 className="app-input"
                 type="tel"
+                required
                 value={createPhone}
                 onChange={(e) => setCreatePhone(e.target.value)}
                 placeholder="(940) 555-0100"
+              />
+            </label>
+            <label className="app-field">
+              <span>Business address</span>
+              <input
+                className="app-input"
+                type="text"
+                required
+                value={createAddress}
+                onChange={(e) => setCreateAddress(e.target.value)}
+                placeholder="Street, city, state, ZIP"
               />
             </label>
             <label className="app-field">
@@ -278,7 +316,7 @@ function RestaurantDashboard() {
               />
             </label>
             <label className="app-field">
-              <span>Website (optional)</span>
+              <span>Website or listing (optional — helps verification)</span>
               <input
                 className="app-input"
                 type="url"

@@ -6,6 +6,7 @@
 
 import type { ReactNode } from "react";
 import { AuthProvider } from "@/lib/auth";
+import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
 
 export default function AppShell({ children }: { children: ReactNode }) {
@@ -15,6 +16,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <main className="app-main">
         <div className="container">{children}</div>
       </main>
+      <SiteFooter />
     </AuthProvider>
   );
 }

@@ -3216,6 +3216,19 @@ select.app-input {
   grid-column: span 2;
 }
 
+/* Shared footer on every app page: legal links + copyright notice. */
+.app-footer {
+  margin-top: 3rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.app-footer p {
+  margin: 0.25rem 0;
+}
+
 /* Landing topbar actions: portals dropdown + sign in, next to the pill */
 .topbar-actions {
   display: flex;
