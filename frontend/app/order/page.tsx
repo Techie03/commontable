@@ -6,12 +6,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import ApiOffline from "@/components/ApiOffline";
 import FeeBreakdown from "@/components/FeeBreakdown";
-import { ApiError, checkServiceability, createPaymentIntent, getMenu, listComingSoonRestaurants, listRestaurants, placeOrder } from "@/lib/api";
+import { ApiError, checkServiceability, createPaymentIntent, getMenu, listAllComingSoonRestaurants, listRestaurants, placeOrder } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
 import {
@@ -56,6 +57,29 @@ const EMPTY_ADDRESS: DeliveryAddress = {
   postal_code: "",
 };
 
+// The pilot covers Denton only, so the feed opens on Denton by default
+// (Uber Eats style: restaurants first, address changeable, never a gate).
+const DENTON_ADDRESS: DeliveryAddress = {
+  line1: "",
+  line2: "",
+  city: "Denton",
+  state: "TX",
+  postal_code: "76201",
+};
+
+// Pilot zone bounds from the seed zone: lng -97.20 to -97.05,
+// lat 33.12 to 33.30.
+const DENTON_BOUNDS = { lngMin: -97.2, lngMax: -97.05, latMin: 33.12, latMax: 33.3 };
+
+function inDentonZone(lat: number, lng: number): boolean {
+  return (
+    lng >= DENTON_BOUNDS.lngMin &&
+    lng <= DENTON_BOUNDS.lngMax &&
+    lat >= DENTON_BOUNDS.latMin &&
+    lat <= DENTON_BOUNDS.latMax
+  );
+}
+
 function loadDraft(): Draft | null {
   try {
     const raw = window.localStorage.getItem(DRAFT_KEY);
@@ -88,6 +112,45 @@ export default function OrderPage() {
   );
 }
 
+function RestaurantCard({
+  r,
+  footer,
+}: {
+  r: Restaurant;
+  footer?: ReactNode;
+}) {
+  const initial = r.name.trim().charAt(0).toUpperCase() || "C";
+  const rating =
+    r.rating_avg != null
+      ? `★ ${r.rating_avg.toFixed(1)}${r.rating_count ? ` (${r.rating_count.toLocaleString()})` : ""}`
+      : null;
+  return (
+    <article className="app-feed-card">
+      {r.card_image_url ? (
+        <img
+          src={r.card_image_url}
+          alt=""
+          className="app-feed-card-img"
+          loading="lazy"
+        />
+      ) : (
+        <div className="app-feed-card-ph" aria-hidden="true">
+          {initial}
+        </div>
+      )}
+      <div className="app-feed-card-body">
+        <h3 className="app-feed-card-title">{r.name}</h3>
+        <p className="app-feed-card-sub">
+          {[r.primary_category, rating, restaurantAddress(r)]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+        {footer}
+      </div>
+    </article>
+  );
+}
+
 function OrderFlow() {
   const { user, ready } = useAuth();
   const router = useRouter();
@@ -111,27 +174,33 @@ function OrderFlow() {
   const [error, setError] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
   const [modifierPick, setModifierPick] = useState<Record<string, Set<string>>>({});
+  // Feed-first discovery: the address lives in a pill + editor modal,
+  // never as a gate in front of the restaurant list.
+  const [addressOpen, setAddressOpen] = useState(false);
+  const [draftAddress, setDraftAddress] = useState<DeliveryAddress>(EMPTY_ADDRESS);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState<string | null>(null);
+  const [locating, setLocating] = useState(false);
+  const [locationNote, setLocationNote] = useState<string | null>(null);
 
-  // Restore a saved draft (address, cart) after a sign in round trip.
+  // Restore a saved draft (address, cart) after a sign in round trip,
+  // then load the feed immediately for the saved or default location.
+  // No form gate: Denton is the default because the pilot covers Denton.
   useEffect(() => {
     const draft = loadDraft();
-    if (!draft) return;
-    setAddress(draft.address);
-    setCart(draft.cart ?? []);
-    setFulfillment(draft.fulfillment ?? "standard");
-    setTipCents(draft.tipCents ?? 0);
-    const postal = draft.address.postal_code?.trim();
-    const city = draft.address.city?.trim();
-    if (postal && city) {
-      checkServiceability(postal, city)
-        .then((res) => {
-          setService(res);
-          if (res.serviceable) void loadRestaurants(postal);
-        })
-        .catch(() => undefined);
+    let start: DeliveryAddress = { ...DENTON_ADDRESS };
+    if (draft) {
+      setCart(draft.cart ?? []);
+      setFulfillment(draft.fulfillment ?? "standard");
+      setTipCents(draft.tipCents ?? 0);
+      const postal = draft.address.postal_code?.trim();
+      const city = draft.address.city?.trim();
+      if (postal && city) start = draft.address;
     }
-    if (draft.restaurantId) {
-      listRestaurants(postal || undefined)
+    setAddress(start);
+    void resolveLocation(start);
+    if (draft?.restaurantId) {
+      listRestaurants(start.postal_code || undefined)
         .then((all) => {
           const found = all.find((r) => String(r.id) === String(draft.restaurantId));
           if (found && found.status !== "prospect") {
@@ -176,8 +245,9 @@ function OrderFlow() {
       // filter defensively so a prospect can never reach the customer.
       setRestaurants(all.filter((r) => r.status !== "prospect"));
       // Coming soon: real Denton restaurants that have not joined yet.
-      // Read-only directory, never orderable.
-      const soon = await listComingSoonRestaurants(postalCode);
+      // Read-only directory, never orderable. Load every page so "Show
+      // all" truly shows all of them, not just the first 100.
+      const soon = await listAllComingSoonRestaurants(postalCode);
       setComingSoon(soon.items);
       setComingSoonTotal(soon.total);
     } catch (err) {
@@ -187,31 +257,83 @@ function OrderFlow() {
     }
   }, [handleApiError]);
 
-  const handleCheckService = useCallback(async () => {
-    if (!address.postal_code.trim() || !address.city.trim()) {
-      setError("Enter a postal code and city to check delivery.");
-      return;
-    }
+  // Resolve the delivery location and load its feed. Runs on mount for
+  // the saved or default location, and whenever the address changes.
+  const resolveLocation = useCallback(async (addr: DeliveryAddress) => {
+    const postal = addr.postal_code.trim();
+    const city = addr.city.trim();
+    if (!postal || !city) return;
     setChecking(true);
     setError(null);
-    setService(null);
-    setSelected(null);
-    setMenu([]);
     try {
-      const res = await checkServiceability(address.postal_code.trim(), address.city.trim());
+      const res = await checkServiceability(postal, city);
       setService(res);
       if (res.serviceable) {
         if (!res.fulfillment_options.includes("standard")) {
           setFulfillment("pickup");
         }
-        await loadRestaurants(address.postal_code.trim());
+        await loadRestaurants(postal);
+      } else {
+        setRestaurants([]);
+        setComingSoon([]);
+        setComingSoonTotal(0);
       }
     } catch (err) {
       handleApiError(err);
     } finally {
       setChecking(false);
     }
-  }, [address, handleApiError, loadRestaurants]);
+  }, [handleApiError, loadRestaurants]);
+
+  // Save the address from the editor modal and reload the feed for it.
+  const applyAddress = useCallback((next: DeliveryAddress) => {
+    if (!next.postal_code.trim() || !next.city.trim()) {
+      setError("Enter a postal code and city for delivery.");
+      return;
+    }
+    setAddressOpen(false);
+    setAddress(next);
+    setSelected(null);
+    setMenu([]);
+    setLocationNote(null);
+    void resolveLocation(next);
+  }, [resolveLocation]);
+
+  // Back to the pilot zone when the current address is not serviceable.
+  const browseDenton = useCallback(() => {
+    const next = { ...DENTON_ADDRESS };
+    setAddress(next);
+    setSelected(null);
+    setMenu([]);
+    setLocationNote(null);
+    void resolveLocation(next);
+  }, [resolveLocation]);
+
+  // Device location, from the address editor: inside the Denton zone it
+  // sets the delivery area to Denton; outside it says so plainly.
+  const handleUseCurrentLocation = useCallback(() => {
+    if (!("geolocation" in navigator)) {
+      setLocationNote("Your device does not share its location. Enter a Denton address instead.");
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        if (inDentonZone(pos.coords.latitude, pos.coords.longitude)) {
+          setDraftAddress({ ...DENTON_ADDRESS });
+          setLocationNote("You are in Denton. Add your street address to complete the delivery address.");
+        } else {
+          setLocationNote("You are outside the Denton pilot zone. Delivery is only available in Denton for now.");
+        }
+      },
+      () => {
+        setLocating(false);
+        setLocationNote("Could not get your location. Enter a Denton address instead.");
+      },
+      { timeout: 10000 }
+    );
+  }, []);
 
   const handleSelectRestaurant = useCallback(async (r: Restaurant) => {
     setSelected(r);
@@ -294,6 +416,48 @@ function OrderFlow() {
     };
   }, [cart, fulfillment, tipCents]);
 
+  // Feed state: what the delivery pill shows, the category chips, and
+  // the search + category filtered lists.
+  const deliverLabel = address.line1.trim()
+    ? `${address.line1.trim()}, ${address.city.trim()} ${address.postal_code.trim()}`
+    : address.postal_code.trim()
+      ? `${address.city.trim()}, ${address.state.trim()} ${address.postal_code.trim()}`
+      : "Set delivery address";
+
+  const categories = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const r of [...restaurants, ...comingSoon]) {
+      const c = r.primary_category?.trim();
+      if (c) counts.set(c, (counts.get(c) ?? 0) + 1);
+    }
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([name]) => name);
+  }, [restaurants, comingSoon]);
+
+  const matchesFeed = useCallback((r: Restaurant) => {
+    if (category && r.primary_category !== category) return false;
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      r.name.toLowerCase().includes(q) ||
+      (r.primary_category ?? "").toLowerCase().includes(q)
+    );
+  }, [category, search]);
+
+  const visibleServing = useMemo(
+    () => restaurants.filter(matchesFeed),
+    [restaurants, matchesFeed]
+  );
+  const visibleSoon = useMemo(
+    () => comingSoon.filter(matchesFeed),
+    [comingSoon, matchesFeed]
+  );
+  const filtering = search.trim() !== "" || category !== null;
+  const soonShown =
+    filtering || showAllComingSoon ? visibleSoon : visibleSoon.slice(0, 12);
+
   const handlePlaceOrder = async () => {
     if (!selected) return;
     if (cart.length === 0) {
@@ -371,174 +535,283 @@ function OrderFlow() {
         </p>
       )}
 
-      {/* Step 1: address + serviceability */}
-      <section className="app-card" aria-label="Delivery address">
-        <h2>1. Where should it go?</h2>
-        <div className="app-form-grid">
-          <label className="app-field app-field-wide">
-            <span>Street address</span>
-            <input
-              className="app-input"
-              value={address.line1}
-              onChange={(e) => setAddress({ ...address, line1: e.target.value })}
-              placeholder="123 Main St"
-              autoComplete="street-address"
-            />
-          </label>
-          <label className="app-field">
-            <span>Apt, suite, or floor (optional)</span>
-            <input
-              className="app-input"
-              value={address.line2 ?? ""}
-              onChange={(e) => setAddress({ ...address, line2: e.target.value })}
-              placeholder="Apt 4"
-            />
-          </label>
-          <label className="app-field">
-            <span>City</span>
-            <input
-              className="app-input"
-              value={address.city}
-              onChange={(e) => setAddress({ ...address, city: e.target.value })}
-              placeholder="Denton"
-              autoComplete="address-level2"
-            />
-          </label>
-          <label className="app-field app-field-narrow">
-            <span>State</span>
-            <input
-              className="app-input"
-              value={address.state}
-              onChange={(e) => setAddress({ ...address, state: e.target.value })}
-              placeholder="TX"
-              maxLength={2}
-            />
-          </label>
-          <label className="app-field app-field-narrow">
-            <span>Postal code</span>
-            <input
-              className="app-input"
-              value={address.postal_code}
-              onChange={(e) => setAddress({ ...address, postal_code: e.target.value })}
-              placeholder="76201"
-              inputMode="numeric"
-              autoComplete="postal-code"
-            />
-          </label>
-        </div>
+      {/* Delivery location pill + search: the feed loads immediately for
+          the saved or default location. No form gate. */}
+      <div className="app-feed-bar">
         <button
           type="button"
-          className="app-btn"
-          onClick={handleCheckService}
-          disabled={checking}
+          className="app-deliver-pill"
+          onClick={() => {
+            setDraftAddress(address);
+            setLocationNote(null);
+            setAddressOpen(true);
+          }}
         >
-          {checking ? "Checking…" : "Check delivery"}
+          <span className="app-deliver-label">Deliver to</span>
+          <span className="app-deliver-value">{deliverLabel}</span>
+          <span className="app-deliver-change">Change</span>
         </button>
-        {service && !service.serviceable && (
-          <p className="app-notice" role="status">
-            We do not deliver to that postal code yet. The pilot covers Denton.
-            You can still pick up from a restaurant in the zone.
-          </p>
-        )}
-        {service?.serviceable && (
-          <p className="app-notice app-notice-good" role="status">
-            Good news, {service.zone_name ?? "your zone"} is covered.
-          </p>
-        )}
-      </section>
+        <label className="app-search">
+          <span className="app-visually-hidden">Search restaurants</span>
+          <input
+            className="app-input"
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search restaurants or cuisines"
+          />
+        </label>
+      </div>
 
-      {/* Step 2: restaurants */}
-      {service?.serviceable && (
-        <section className="app-card" aria-label="Restaurants">
-          <h2>2. Choose a restaurant</h2>
-          {loadingRestaurants ? (
-            <p>Loading restaurants…</p>
-          ) : restaurants.length === 0 ? (
-            <p>
-              No restaurants are serving this address yet. Below, you can
-              browse real menus from local restaurants coming soon.
-            </p>
-          ) : (
-            <ul className="app-list">
-              {restaurants.map((r) => (
-                <li key={r.id} className="app-list-row">
-                  <button
-                    type="button"
-                    className={`app-list-button${selected?.id === r.id ? " selected" : ""}`}
-                    onClick={() => handleSelectRestaurant(r)}
-                  >
-                    <span className="app-list-title">
-                      {r.name}
-                      {r.status === "demo" && (
-                        <span className="app-tag">Demo restaurant</span>
-                      )}
-                    </span>
-                    <span className="app-list-sub">
-                      {[r.primary_category, restaurantAddress(r)]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </span>
-                  </button>
-                </li>
+      {locationNote && (
+        <p className="app-notice" role="status">
+          {locationNote}
+        </p>
+      )}
+
+      {service && !service.serviceable && (
+        <p className="app-notice" role="status">
+          We do not deliver to {address.postal_code.trim()} yet. The pilot
+          covers Denton.{" "}
+          <button
+            type="button"
+            className="app-link-button"
+            onClick={browseDenton}
+          >
+            Browse Denton restaurants
+          </button>
+        </p>
+      )}
+
+      {checking && !service ? (
+        <p>Finding restaurants near you…</p>
+      ) : (
+        <>
+          {categories.length > 0 && (
+            <div className="app-chips" role="group" aria-label="Cuisines">
+              <button
+                type="button"
+                className={`app-chip${category === null ? " active" : ""}`}
+                onClick={() => setCategory(null)}
+              >
+                All
+              </button>
+              {categories.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  className={`app-chip${category === c ? " active" : ""}`}
+                  onClick={() => setCategory(category === c ? null : c)}
+                >
+                  {c}
+                </button>
               ))}
-            </ul>
+            </div>
           )}
-        </section>
-      )}
 
-      {/* Coming soon: real Denton restaurants, not yet partners */}
-      {service?.serviceable && comingSoonTotal > 0 && (
-        <section className="app-card" aria-label="Restaurants coming soon">
-          <h2>Coming soon in Denton</h2>
-          <p className="app-lede">
-            {comingSoonTotal} local restaurant{comingSoonTotal === 1 ? "" : "s"}{" "}
-            near {address.postal_code.trim()} {comingSoonTotal === 1 ? "has" : "have"}{" "}
-            not joined CommonTable yet. Ordering opens as each one comes on
-            board.
-          </p>
-          <ul className="app-list">
-            {(showAllComingSoon ? comingSoon : comingSoon.slice(0, 12)).map((r) => (
-              <li key={r.id} className="app-list-row">
-                <span>
-                  <span className="app-list-title">
-                    {r.name}
-                    <span className="app-tag app-tag-muted">Coming soon</span>
-                  </span>
-                  <span className="app-list-sub">
-                    {[r.primary_category, restaurantAddress(r), r.phone]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </span>
-                </span>
-                {r.has_menu && (
-                  <Link
-                    href={`/menu/${r.id}`}
-                    className="app-btn app-btn-small app-btn-ghost"
-                  >
-                    View menu
-                  </Link>
+          <section aria-label="Restaurants serving now">
+            <h2>Serving now</h2>
+            {loadingRestaurants ? (
+              <p>Loading restaurants…</p>
+            ) : visibleServing.length === 0 ? (
+              <p>
+                No restaurants are serving this address yet. Below, you can
+                browse real menus from local restaurants coming soon.
+              </p>
+            ) : (
+              <div className="app-feed-grid">
+                {visibleServing.map((r) => (
+                  <RestaurantCard
+                    key={r.id}
+                    r={r}
+                    footer={
+                      <button
+                        type="button"
+                        className="app-btn app-btn-small"
+                        onClick={() => {
+                          void handleSelectRestaurant(r);
+                          document
+                            .getElementById("order-menu")
+                            ?.scrollIntoView({ behavior: "smooth" });
+                        }}
+                      >
+                        {selected?.id === r.id ? "Viewing menu" : "View menu"}
+                      </button>
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {comingSoonTotal > 0 && (
+            <section aria-label="Restaurants coming soon">
+              <h2>Coming soon in Denton</h2>
+              <p className="app-lede">
+                {comingSoonTotal} local restaurant
+                {comingSoonTotal === 1 ? "" : "s"} near{" "}
+                {address.postal_code.trim()}{" "}
+                {comingSoonTotal === 1 ? "has" : "have"} not joined CommonTable
+                yet. Ordering opens as each one comes on board.
+              </p>
+              <div className="app-feed-grid">
+                {soonShown.map((r) => (
+                  <RestaurantCard
+                    key={r.id}
+                    r={r}
+                    footer={
+                      <span className="app-feed-card-actions">
+                        <span className="app-tag app-tag-muted">Coming soon</span>
+                        {r.has_menu && (
+                          <Link
+                            href={`/menu/${r.id}`}
+                            className="app-btn app-btn-small app-btn-ghost"
+                          >
+                            View menu
+                          </Link>
+                        )}
+                      </span>
+                    }
+                  />
+                ))}
+              </div>
+              {!filtering && comingSoonTotal > 12 && (
+                <button
+                  type="button"
+                  className="app-btn app-btn-small app-btn-ghost"
+                  onClick={() => setShowAllComingSoon((v) => !v)}
+                >
+                  {showAllComingSoon
+                    ? "Show fewer"
+                    : `Show all ${comingSoonTotal} coming soon`}
+                </button>
+              )}
+              {filtering &&
+                visibleSoon.length === 0 &&
+                visibleServing.length === 0 && (
+                  <p>No restaurants match that search.</p>
                 )}
-              </li>
-            ))}
-          </ul>
-          {comingSoonTotal > 12 && (
-            <button
-              type="button"
-              className="app-btn app-btn-small app-btn-ghost"
-              onClick={() => setShowAllComingSoon((v) => !v)}
-            >
-              {showAllComingSoon
-                ? "Show fewer"
-                : `Show all ${comingSoonTotal} coming soon`}
-            </button>
+            </section>
           )}
-        </section>
+        </>
       )}
 
-      {/* Step 3: menu + cart */}
+      {/* Address editor: a modal, not a gate. */}
+      {addressOpen && (
+        <div
+          className="app-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Delivery address"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setAddressOpen(false);
+          }}
+        >
+          <div className="app-modal-sheet">
+            <h2>Delivery address</h2>
+            <div className="app-form-grid">
+              <label className="app-field app-field-wide">
+                <span>Street address</span>
+                <input
+                  className="app-input"
+                  value={draftAddress.line1}
+                  onChange={(e) =>
+                    setDraftAddress({ ...draftAddress, line1: e.target.value })
+                  }
+                  placeholder="123 Main St"
+                  autoComplete="street-address"
+                />
+              </label>
+              <label className="app-field">
+                <span>Apt, suite, or floor (optional)</span>
+                <input
+                  className="app-input"
+                  value={draftAddress.line2 ?? ""}
+                  onChange={(e) =>
+                    setDraftAddress({ ...draftAddress, line2: e.target.value })
+                  }
+                  placeholder="Apt 4"
+                />
+              </label>
+              <label className="app-field">
+                <span>City</span>
+                <input
+                  className="app-input"
+                  value={draftAddress.city}
+                  onChange={(e) =>
+                    setDraftAddress({ ...draftAddress, city: e.target.value })
+                  }
+                  placeholder="Denton"
+                  autoComplete="address-level2"
+                />
+              </label>
+              <label className="app-field app-field-narrow">
+                <span>State</span>
+                <input
+                  className="app-input"
+                  value={draftAddress.state}
+                  onChange={(e) =>
+                    setDraftAddress({ ...draftAddress, state: e.target.value })
+                  }
+                  placeholder="TX"
+                  maxLength={2}
+                />
+              </label>
+              <label className="app-field app-field-narrow">
+                <span>Postal code</span>
+                <input
+                  className="app-input"
+                  value={draftAddress.postal_code}
+                  onChange={(e) =>
+                    setDraftAddress({
+                      ...draftAddress,
+                      postal_code: e.target.value,
+                    })
+                  }
+                  placeholder="76201"
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                />
+              </label>
+            </div>
+            {locationNote && (
+              <p className="app-notice" role="status">
+                {locationNote}
+              </p>
+            )}
+            <div className="app-modal-actions">
+              <button
+                type="button"
+                className="app-btn app-btn-ghost"
+                onClick={handleUseCurrentLocation}
+                disabled={locating}
+              >
+                {locating ? "Locating…" : "Use my current location"}
+              </button>
+              <button
+                type="button"
+                className="app-btn app-btn-ghost"
+                onClick={() => setAddressOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="app-btn"
+                onClick={() => applyAddress(draftAddress)}
+              >
+                Save address
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+      {/* Menu + cart */}
       {selected && (
-        <section className="app-card" aria-label="Menu">
-          <h2>3. Menu at {selected.name}</h2>
+        <section className="app-card" aria-label="Menu" id="order-menu">
+          <h2>Menu at {selected.name}</h2>
           {loadingMenu ? (
             <p>Loading the menu…</p>
           ) : menu.length === 0 ? (
@@ -638,10 +911,10 @@ function OrderFlow() {
         </section>
       )}
 
-      {/* Step 4: checkout */}
+      {/* Checkout */}
       {selected && cart.length > 0 && (
         <section className="app-card" aria-label="Checkout">
-          <h2>4. Checkout</h2>
+          <h2>Checkout</h2>
           <fieldset className="app-fieldset">
             <legend>How do you want to get it?</legend>
             <label className="app-radio">

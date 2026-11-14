@@ -58,6 +58,7 @@ def _make_prospect_with_menu(db, name="Pilot Taqueria", with_menu=True):
             price_cents=999,
             category="Mains",
             available=True,
+            image_url="https://example.com/taco.jpg",
         )
         db.add(item)
         db.flush()
@@ -149,7 +150,9 @@ def test_coming_soon_has_menu_flag(client, seeded):
     assert res.status_code == 200, res.text
     by_id = {r["id"]: r for r in res.json()["items"]}
     assert by_id[with_menu_id]["has_menu"] is True
+    assert by_id[with_menu_id]["card_image_url"] == "https://example.com/taco.jpg"
     assert by_id[without_menu_id]["has_menu"] is False
+    assert by_id[without_menu_id]["card_image_url"] is None
 
 
 def test_prospect_with_menu_still_not_orderable(client, seeded):

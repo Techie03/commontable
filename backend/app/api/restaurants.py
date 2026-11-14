@@ -143,10 +143,29 @@ def list_coming_soon(
         .distinct()
         .all()
     }
+    # Card photo for pilot restaurants: the first menu item photo, one
+    # query for the whole page.
+    card_images: dict[int, str] = {}
+    if sliced:
+        rows = (
+            db.query(Menu.restaurant_id, MenuItem.image_url)
+            .join(MenuItem, MenuItem.menu_id == Menu.id)
+            .filter(
+                Menu.restaurant_id.in_([r.id for r in sliced]),
+                Menu.active.is_(True),
+                MenuItem.image_url.isnot(None),
+                MenuItem.image_url != "",
+            )
+            .order_by(MenuItem.id)
+            .all()
+        )
+        for rid, url in rows:
+            card_images.setdefault(rid, url)
     items = []
     for r in sliced:
         d = restaurant_to_out(r).model_dump()
         d["has_menu"] = r.id in menu_restaurant_ids
+        d["card_image_url"] = card_images.get(r.id)
         items.append(d)
     return {
         "items": items,

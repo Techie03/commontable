@@ -83,8 +83,8 @@
       },
       "Thai Ocha Hot Plate": {
         "prompt": "overhead photo of sizzling mixed seafood stir-fry with shrimp, squid, mushrooms, carrots, celery, cashew nuts and onions in a glossy chili sauce on a hot plate, Thai restaurant food photography",
-        "source": "needs_generation",
-        "url": null
+        "source": "generated",
+        "url": "/menu/pilot/thai-ocha-hot-plate.jpg"
       },
       "Fried Banana with Ice Cream": {
         "file_page": "https://commons.wikimedia.org/wiki/File:Deep_fried_banana_dessert_at_Rice_and_Noodles_Thai_Restaurant.jpg",
@@ -95,10 +95,9 @@
     },
     "482509130739511": {
       "Veg Clear Soup": {
-        "file_page": "https://commons.wikimedia.org/wiki/File:Bulion_Warzywny_-_1.jpg",
-        "license": "CC0",
-        "source": "commons",
-        "url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Bulion_Warzywny_-_1.jpg"
+        "source": "generated",
+        "url": "/menu/pilot/namaste-veg-clear-soup.jpg",
+        "replaces_watermarked_commons_url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Bulion_Warzywny_-_1.jpg"
       },
       "Paneer 65": {
         "file_page": "https://commons.wikimedia.org/wiki/File:Homemade_Paneer_65.jpg",
@@ -200,8 +199,8 @@
       },
       "Side Caesar": {
         "prompt": "overhead photo of a small Caesar salad with romaine lettuce, shaved parmesan, croutons and red onion in a white bowl, restaurant food photography",
-        "source": "needs_generation",
-        "url": null
+        "source": "generated",
+        "url": "/menu/pilot/jonuzi-side-caesar.jpg"
       },
       "Small 12\"": {
         "file_page": "https://commons.wikimedia.org/wiki/File:PizzaMargherita.jpg",
@@ -223,8 +222,8 @@
       },
       "*NEW* Cacio e Pizza": {
         "prompt": "overhead photo of a white cheese pizza with melted mozzarella, cracked black pepper and shaved parmesan on a wooden board, restaurant food photography",
-        "source": "needs_generation",
-        "url": null
+        "source": "generated",
+        "url": "/menu/pilot/jonuzi-cacio-e-pizza.jpg"
       },
       "Supreme": {
         "file_page": "https://commons.wikimedia.org/wiki/File:Supreme_pizza.jpg",
@@ -240,18 +239,18 @@
       },
       "Buffalo Chicken": {
         "prompt": "overhead photo of a buffalo chicken pizza with orange buffalo sauce drizzle, grilled chicken and melted mozzarella on a wooden board, restaurant food photography",
-        "source": "needs_generation",
-        "url": null
+        "source": "generated",
+        "url": "/menu/pilot/jonuzi-buffalo-chicken-pizza.jpg"
       },
       "Pizza Mozzarella": {
         "prompt": "overhead photo of a white pizza with melted mozzarella, garlic and olive oil, no tomato sauce, on a wooden board, restaurant food photography",
-        "source": "needs_generation",
-        "url": null
+        "source": "generated",
+        "url": "/menu/pilot/jonuzi-pizza-mozzarella.jpg"
       },
       "Buffalo Chicken Sub": {
         "prompt": "photo of a buffalo chicken sub sandwich with grilled chicken, melted American cheese and orange buffalo sauce on a toasted sub roll, restaurant food photography",
-        "source": "needs_generation",
-        "url": null
+        "source": "generated",
+        "url": "/menu/pilot/jonuzi-buffalo-chicken-sub.jpg"
       },
       "Italian Sub": {
         "file_page": "https://commons.wikimedia.org/wiki/File:QuiznosSub.jpg",
@@ -261,13 +260,13 @@
       },
       "Buffalo Chicken Stromboli": {
         "prompt": "photo of a golden folded stromboli turnover sliced open showing buffalo chicken and melted mozzarella, marinara sauce on the side, restaurant food photography",
-        "source": "needs_generation",
-        "url": null
+        "source": "generated",
+        "url": "/menu/pilot/jonuzi-buffalo-chicken-stromboli.jpg"
       },
       "Cannoli": {
         "prompt": "photo of a single large cannoli dusted with powdered sugar on a small white plate, Italian bakery food photography",
-        "source": "needs_generation",
-        "url": null
+        "source": "generated",
+        "url": "/menu/pilot/jonuzi-cannoli.jpg"
       }
     },
     "26368235492833703": {

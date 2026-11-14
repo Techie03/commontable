@@ -306,6 +306,25 @@ export function listComingSoonRestaurants(
   ).then((r) => ({ items: r.items ?? [], total: r.total ?? 0 }));
 }
 
+/** All coming-soon restaurants for a postal code, across every page.
+ *  The API caps page_size at 100, so "Show all" must page through;
+ *  a single page would silently hide every restaurant past the first
+ *  100 alphabetically. */
+export async function listAllComingSoonRestaurants(
+  postalCode?: string
+): Promise<{ items: Restaurant[]; total: number }> {
+  const pageSize = 100;
+  const first = await listComingSoonRestaurants(postalCode, 1, pageSize);
+  const items = [...first.items];
+  const total = first.total;
+  for (let page = 2; items.length < total; page++) {
+    const next = await listComingSoonRestaurants(postalCode, page, pageSize);
+    if (next.items.length === 0) break;
+    items.push(...next.items);
+  }
+  return { items, total };
+}
+
 export function getRestaurant(id: string): Promise<Restaurant> {
   return get<Restaurant>(`/api/v1/restaurants/${id}`);
 }

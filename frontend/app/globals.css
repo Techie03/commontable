@@ -3272,3 +3272,188 @@ select.app-input {
   font-weight: 700;
   color: var(--teal);
 }
+
+/* Uber Eats style order feed: delivery pill, search, category chips,
+   restaurant cards, and the address editor modal. */
+.app-feed-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: stretch;
+  margin-bottom: 1rem;
+}
+
+.app-deliver-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 260px;
+  text-align: left;
+  background: var(--warm-white);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font: inherit;
+  color: var(--charcoal);
+}
+
+.app-deliver-pill:hover {
+  border-color: var(--teal);
+}
+
+.app-deliver-label {
+  font-weight: 600;
+  color: var(--charcoal-soft);
+  white-space: nowrap;
+}
+
+.app-deliver-value {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-deliver-change {
+  color: var(--teal);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.app-search {
+  flex: 2 1 280px;
+}
+
+.app-search .app-input {
+  border-radius: 999px;
+  width: 100%;
+}
+
+.app-link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--teal);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.app-chips {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  scrollbar-width: thin;
+}
+
+.app-chip {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  background: var(--warm-white);
+  color: var(--charcoal);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.app-chip.active {
+  background: var(--forest);
+  border-color: var(--forest);
+  color: var(--warm-white);
+}
+
+.app-feed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.app-feed-card {
+  background: var(--warm-white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-feed-card-img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+}
+
+.app-feed-card-ph {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--teal-pale), var(--warm-sand));
+  color: var(--forest);
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.app-feed-card-body {
+  padding: 0.75rem 0.9rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.app-feed-card-title {
+  font-size: 1.05rem;
+  margin: 0;
+}
+
+.app-feed-card-sub {
+  color: var(--charcoal-soft);
+  font-size: 0.9rem;
+  margin: 0;
+  flex: 1;
+}
+
+.app-feed-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+}
+
+.app-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 100;
+}
+
+.app-modal-sheet {
+  background: var(--warm-white);
+  border-radius: 12px;
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.app-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}

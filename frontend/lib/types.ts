@@ -103,6 +103,8 @@ export interface Restaurant {
   address?: string | RestaurantAddressObject;
   /** True when a prospect restaurant has a collected menu to browse. */
   has_menu?: boolean;
+  /** First menu item photo, for coming-soon cards. Null when no photo. */
+  card_image_url?: string | null;
 }
 
 export interface Modifier {
