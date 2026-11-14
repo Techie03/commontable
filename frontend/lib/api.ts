@@ -329,6 +329,23 @@ export function getRestaurant(id: string): Promise<Restaurant> {
   return get<Restaurant>(`/api/v1/restaurants/${id}`);
 }
 
+/**
+ * Onboarding application: creates a pending restaurant and grants the
+ * creator the restaurant_owner role scoped to it. Only the name is
+ * required; the address and menu are added after.
+ */
+export function createRestaurant(body: {
+  name: string;
+  brand_name?: string;
+  description?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  direct2door_enabled?: boolean;
+}): Promise<Restaurant> {
+  return post<Restaurant>("/api/v1/restaurants", body);
+}
+
 export function getMenu(restaurantId: string): Promise<MenuItem[]> {
   return get<Paginated<MenuItem> | MenuItem[] | { items: MenuItem[] }>(
     `/api/v1/restaurants/${restaurantId}/menu`

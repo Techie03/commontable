@@ -4,7 +4,7 @@
 
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import ApiOffline from "@/components/ApiOffline";
@@ -13,6 +13,7 @@ import {
   acceptOrder,
   ApiError,
   completeOrder,
+  createRestaurant,
   getAccessToken,
   getRestaurant,
   getRestaurantOrders,
@@ -43,9 +44,16 @@ export default function RestaurantPage() {
 }
 
 function RestaurantDashboard() {
-  const { user, ready, restaurantId } = useAuth();
+  const { user, ready, restaurantId, refreshUser } = useAuth();
   const [manualId, setManualId] = useState("");
   const [manualInput, setManualInput] = useState("");
+  const [createName, setCreateName] = useState("");
+  const [createPhone, setCreatePhone] = useState("");
+  const [createEmail, setCreateEmail] = useState("");
+  const [createWebsite, setCreateWebsite] = useState("");
+  const [createDescription, setCreateDescription] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [reports, setReports] = useState<{
@@ -165,6 +173,44 @@ function RestaurantDashboard() {
     }
   };
 
+  // New owner onboarding: create the restaurant instead of asking for an
+  // id the owner cannot know yet. The backend scopes the creator to it;
+  // the id is also kept locally so the dashboard opens at once, and the
+  // session refresh makes the scope stick for later visits.
+  const handleCreate = async (e: FormEvent) => {
+    e.preventDefault();
+    const name = createName.trim();
+    if (!name) {
+      setCreateError("Give your restaurant a name.");
+      return;
+    }
+    setCreating(true);
+    setCreateError(null);
+    try {
+      const created = await createRestaurant({
+        name,
+        phone: createPhone.trim() || undefined,
+        email: createEmail.trim() || undefined,
+        website: createWebsite.trim() || undefined,
+        description: createDescription.trim() || undefined,
+      });
+      const id = String(created.id);
+      setManualId(id);
+      try {
+        window.sessionStorage.setItem(MANUAL_ID_KEY, id);
+      } catch {
+        // ignore
+      }
+      refreshUser().catch(() => undefined);
+    } catch (err) {
+      if (err instanceof ApiError && err.unreachable) setOffline(true);
+      else if (err instanceof ApiError) setCreateError(err.message);
+      else setCreateError("Could not create the restaurant. Please try again.");
+    } finally {
+      setCreating(false);
+    }
+  };
+
   if (offline) {
     return <ApiOffline onRetry={() => { setOffline(false); setLoading(true); load(); }} />;
   }
@@ -190,20 +236,95 @@ function RestaurantDashboard() {
       <div>
         <h1>Restaurant dashboard</h1>
         <p>
-          No restaurant is linked to your account yet. If you are an admin or
-          an owner, enter a restaurant id to open its dashboard.
+          No restaurant is linked to your account yet. Set up your
+          restaurant below and its dashboard opens right away.
         </p>
-        <div className="app-inline-form">
-          <input
-            className="app-input"
-            value={manualInput}
-            onChange={(e) => setManualInput(e.target.value)}
-            placeholder="Restaurant id"
-          />
-          <button type="button" className="app-btn" onClick={saveManualId}>
-            Open dashboard
-          </button>
-        </div>
+        <section className="app-card" aria-label="Set up your restaurant">
+          <h2>Set up your restaurant</h2>
+          <p className="app-muted">
+            Your restaurant is created as pending. You can set up your menu
+            right away; it starts taking orders once it is approved.
+          </p>
+          <form onSubmit={handleCreate}>
+            <label className="app-field">
+              <span>Restaurant name</span>
+              <input
+                className="app-input"
+                type="text"
+                required
+                value={createName}
+                onChange={(e) => setCreateName(e.target.value)}
+                placeholder="Your restaurant's name"
+              />
+            </label>
+            <label className="app-field">
+              <span>Phone (optional)</span>
+              <input
+                className="app-input"
+                type="tel"
+                value={createPhone}
+                onChange={(e) => setCreatePhone(e.target.value)}
+                placeholder="(940) 555-0100"
+              />
+            </label>
+            <label className="app-field">
+              <span>Email (optional)</span>
+              <input
+                className="app-input"
+                type="email"
+                value={createEmail}
+                onChange={(e) => setCreateEmail(e.target.value)}
+                placeholder="hello@yourrestaurant.com"
+              />
+            </label>
+            <label className="app-field">
+              <span>Website (optional)</span>
+              <input
+                className="app-input"
+                type="url"
+                value={createWebsite}
+                onChange={(e) => setCreateWebsite(e.target.value)}
+                placeholder="https://yourrestaurant.com"
+              />
+            </label>
+            <label className="app-field">
+              <span>About your restaurant (optional)</span>
+              <input
+                className="app-input"
+                type="text"
+                value={createDescription}
+                onChange={(e) => setCreateDescription(e.target.value)}
+                placeholder="A line about the food you serve"
+              />
+            </label>
+            {createError && (
+              <p className="app-error" role="alert">
+                {createError}
+              </p>
+            )}
+            <button type="submit" className="app-btn" disabled={creating}>
+              {creating ? "Creating…" : "Create restaurant"}
+            </button>
+          </form>
+        </section>
+        <section aria-label="Open an existing restaurant">
+          <h2>Already on CommonTable?</h2>
+          <p>
+            If your restaurant already exists, enter its id to open its
+            dashboard.
+          </p>
+          <div className="app-inline-form">
+            <input
+              className="app-input"
+              value={manualInput}
+              onChange={(e) => setManualInput(e.target.value)}
+              placeholder="Restaurant id"
+            />
+            <button type="button" className="app-btn" onClick={saveManualId}>
+              Open dashboard
+            </button>
+          </div>
+        </section>
       </div>
     );
   }
