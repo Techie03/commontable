@@ -112,6 +112,42 @@ export default function OrderPage() {
   );
 }
 
+// Food emoji per cuisine, for the category tiles and for cards without
+// a photo. Visual treatment only: no restaurant photo is invented.
+const CATEGORY_EMOJI: Array<[RegExp, string]> = [
+  [/pizza/i, "🍕"],
+  [/burger/i, "🍔"],
+  [/mexican|taco/i, "🌮"],
+  [/indian/i, "🍛"],
+  [/chinese/i, "🥡"],
+  [/thai/i, "🍜"],
+  [/barbecue|bbq/i, "🍖"],
+  [/sushi|japanese/i, "🍣"],
+  [/italian|pasta/i, "🍝"],
+  [/breakfast|brunch/i, "🥞"],
+  [/coffee|cafe/i, "☕"],
+  [/bakery|donut/i, "🥐"],
+  [/dessert|ice cream/i, "🍰"],
+  [/fast food/i, "🍟"],
+  [/grocery/i, "🛒"],
+  [/vegan|vegetarian|salad/i, "🥗"],
+  [/seafood|fish/i, "🦐"],
+  [/chicken/i, "🍗"],
+  [/sandwich|deli/i, "🥪"],
+  [/korean/i, "🍚"],
+  [/vietnamese|pho/i, "🍜"],
+  [/mediterranean|greek/i, "🥙"],
+  [/american/i, "🍔"],
+];
+
+function categoryEmoji(category?: string | null): string {
+  if (!category) return "🍽️";
+  for (const [re, emoji] of CATEGORY_EMOJI) {
+    if (re.test(category)) return emoji;
+  }
+  return "🍽️";
+}
+
 function RestaurantCard({
   r,
   footer,
@@ -119,7 +155,6 @@ function RestaurantCard({
   r: Restaurant;
   footer?: ReactNode;
 }) {
-  const initial = r.name.trim().charAt(0).toUpperCase() || "C";
   const rating =
     r.rating_avg != null
       ? `★ ${r.rating_avg.toFixed(1)}${r.rating_count ? ` (${r.rating_count.toLocaleString()})` : ""}`
@@ -135,7 +170,7 @@ function RestaurantCard({
         />
       ) : (
         <div className="app-feed-card-ph" aria-hidden="true">
-          {initial}
+          {categoryEmoji(r.primary_category)}
         </div>
       )}
       <div className="app-feed-card-body">
@@ -457,6 +492,12 @@ function OrderFlow() {
   const filtering = search.trim() !== "" || category !== null;
   const soonShown =
     filtering || showAllComingSoon ? visibleSoon : visibleSoon.slice(0, 12);
+  // Featured row: pilots with a collected menu and a photo. Only shown
+  // when nothing is filtered, like the reference app's featured rail.
+  const featured = useMemo(
+    () => comingSoon.filter((r) => r.has_menu && r.card_image_url),
+    [comingSoon]
+  );
 
   const handlePlaceOrder = async () => {
     if (!selected) return;
@@ -535,6 +576,28 @@ function OrderFlow() {
         </p>
       )}
 
+      {/* Delivery or pickup: sets how the order is fulfilled at checkout. */}
+      <div className="app-mode-tabs" role="tablist" aria-label="Delivery or pickup">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={fulfillment !== "pickup"}
+          className={`app-mode-tab${fulfillment !== "pickup" ? " active" : ""}`}
+          onClick={() => setFulfillment("standard")}
+        >
+          🛵 Delivery
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={fulfillment === "pickup"}
+          className={`app-mode-tab${fulfillment === "pickup" ? " active" : ""}`}
+          onClick={() => setFulfillment("pickup")}
+        >
+          🛍️ Pickup
+        </button>
+      </div>
+
       {/* Delivery location pill + search: the feed loads immediately for
           the saved or default location. No form gate. */}
       <div className="app-feed-bar">
@@ -588,25 +651,58 @@ function OrderFlow() {
       ) : (
         <>
           {categories.length > 0 && (
-            <div className="app-chips" role="group" aria-label="Cuisines">
+            <div className="app-category-tiles" role="group" aria-label="Cuisines">
               <button
                 type="button"
-                className={`app-chip${category === null ? " active" : ""}`}
+                className={`app-category-tile${category === null ? " active" : ""}`}
                 onClick={() => setCategory(null)}
               >
-                All
+                <span className="app-category-tile-emoji" aria-hidden="true">
+                  🍽️
+                </span>
+                <span className="app-category-tile-label">All</span>
               </button>
               {categories.map((c) => (
                 <button
                   key={c}
                   type="button"
-                  className={`app-chip${category === c ? " active" : ""}`}
+                  className={`app-category-tile${category === c ? " active" : ""}`}
                   onClick={() => setCategory(category === c ? null : c)}
                 >
-                  {c}
+                  <span className="app-category-tile-emoji" aria-hidden="true">
+                    {categoryEmoji(c)}
+                  </span>
+                  <span className="app-category-tile-label">{c}</span>
                 </button>
               ))}
             </div>
+          )}
+
+          {!filtering && featured.length > 0 && (
+            <section aria-label="Featured restaurants">
+              <h2>Featured</h2>
+              <div className="app-featured-row">
+                {featured.map((r) => (
+                  <RestaurantCard
+                    key={r.id}
+                    r={r}
+                    footer={
+                      <span className="app-feed-card-actions">
+                        <span className="app-tag app-tag-muted">Coming soon</span>
+                        {r.has_menu && (
+                          <Link
+                            href={`/menu/${r.id}`}
+                            className="app-btn app-btn-small app-btn-ghost"
+                          >
+                            View menu
+                          </Link>
+                        )}
+                      </span>
+                    }
+                  />
+                ))}
+              </div>
+            </section>
           )}
 
           <section aria-label="Restaurants serving now">
