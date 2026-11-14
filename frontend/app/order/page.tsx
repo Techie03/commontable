@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import ApiOffline from "@/components/ApiOffline";
 import FeeBreakdown from "@/components/FeeBreakdown";
-import { ApiError, checkServiceability, createPaymentIntent, getMenu, listAllComingSoonRestaurants, listRestaurants, placeOrder } from "@/lib/api";
+import { ApiError, checkServiceability, createPaymentIntent, getMenu, listAllComingSoonRestaurants, listOrders, listRestaurants, placeOrder } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
 import {
@@ -20,6 +20,7 @@ import {
   type DeliveryAddress,
   type FeeBreakdown as Fees,
   type MenuItem,
+  type Order,
   type Restaurant,
   type Serviceability,
 } from "@/lib/types";
@@ -186,6 +187,75 @@ function RestaurantCard({
   );
 }
 
+// A past order as a wide photo card: the restaurant's photo when the
+// feed knows it, otherwise a cuisine emoji. Shows only real facts:
+// the order date and total. No invented delivery time or fee.
+function PastOrderCard({
+  order,
+  restaurant,
+  onOrderAgain,
+}: {
+  order: Order;
+  restaurant?: Restaurant;
+  onOrderAgain?: (r: Restaurant) => void;
+}) {
+  const rating =
+    restaurant?.rating_avg != null
+      ? `★ ${restaurant.rating_avg.toFixed(1)}${restaurant.rating_count ? ` (${restaurant.rating_count.toLocaleString()})` : ""}`
+      : null;
+  const date = order.created_at
+    ? new Date(order.created_at).toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+  const total =
+    order.total_cents != null ? formatCents(order.total_cents) : null;
+  return (
+    <article className="app-feed-card">
+      {restaurant?.card_image_url ? (
+        <img
+          src={restaurant.card_image_url}
+          alt=""
+          className="app-feed-card-img"
+          loading="lazy"
+        />
+      ) : (
+        <div className="app-feed-card-ph" aria-hidden="true">
+          {categoryEmoji(restaurant?.primary_category)}
+        </div>
+      )}
+      <div className="app-feed-card-body">
+        <h3 className="app-feed-card-title">
+          {order.restaurant_name ?? restaurant?.name ?? "Restaurant"}
+        </h3>
+        <p className="app-feed-card-sub">
+          {[rating, date ? `Ordered ${date}` : null, total]
+            .filter(Boolean)
+            .join(" · ")}
+        </p>
+        <span className="app-feed-card-actions">
+          <Link
+            href={`/order/${order.id}`}
+            className="app-btn app-btn-small app-btn-ghost"
+          >
+            View order
+          </Link>
+          {restaurant && onOrderAgain && (
+            <button
+              type="button"
+              className="app-btn app-btn-small"
+              onClick={() => onOrderAgain(restaurant)}
+            >
+              Order again
+            </button>
+          )}
+        </span>
+      </div>
+    </article>
+  );
+}
+
 function OrderFlow() {
   const { user, ready } = useAuth();
   const router = useRouter();
@@ -217,6 +287,7 @@ function OrderFlow() {
   const [category, setCategory] = useState<string | null>(null);
   const [locating, setLocating] = useState(false);
   const [locationNote, setLocationNote] = useState<string | null>(null);
+  const [pastOrders, setPastOrders] = useState<Order[]>([]);
 
   // Restore a saved draft (address, cart) after a sign in round trip,
   // then load the feed immediately for the saved or default location.
@@ -248,6 +319,15 @@ function OrderFlow() {
     // Only on mount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Past orders for the signed in customer, newest first. A failed load
+  // just hides the section; the feed does not depend on it.
+  useEffect(() => {
+    if (!ready || !user) return;
+    listOrders()
+      .then(setPastOrders)
+      .catch(() => undefined);
+  }, [ready, user]);
 
   // Persist the draft as the customer builds the order.
   useEffect(() => {
@@ -499,6 +579,31 @@ function OrderFlow() {
     [comingSoon]
   );
 
+  const firstName = user?.full_name?.trim().split(" ")[0] || null;
+  const cartCount = useMemo(
+    () => cart.reduce((n, line) => n + line.quantity, 0),
+    [cart]
+  );
+  // Past orders, one card per restaurant (most recent order each),
+  // newest first. The demo restaurant never surfaces here.
+  const pastRestaurants = useMemo(() => {
+    const seen = new Set<string>();
+    const out: Array<{ order: Order; restaurant?: Restaurant }> = [];
+    for (const o of pastOrders) {
+      if (o.status !== "COMPLETED" && o.status !== "DELIVERED") continue;
+      if (o.restaurant_id === "1") continue;
+      if (seen.has(o.restaurant_id)) continue;
+      seen.add(o.restaurant_id);
+      out.push({
+        order: o,
+        restaurant: [...restaurants, ...comingSoon].find(
+          (r) => String(r.id) === String(o.restaurant_id)
+        ),
+      });
+    }
+    return out.slice(0, 6);
+  }, [pastOrders, restaurants, comingSoon]);
+
   const handlePlaceOrder = async () => {
     if (!selected) return;
     if (cart.length === 0) {
@@ -565,7 +670,7 @@ function OrderFlow() {
 
   return (
     <div className="app-order">
-      <h1>Order food</h1>
+      <h1>{firstName ? `Welcome back, ${firstName}` : "Order food"}</h1>
       <p className="app-lede">
         Restaurant menu prices, one clear delivery fee, and no hidden markups.
       </p>
@@ -598,32 +703,45 @@ function OrderFlow() {
         </button>
       </div>
 
-      {/* Delivery location pill + search: the feed loads immediately for
-          the saved or default location. No form gate. */}
-      <div className="app-feed-bar">
+      {/* Top bar: delivery location + profile + cart, like the reference
+          app. No bell: there is no notifications system yet. */}
+      <div className="app-topbar">
         <button
           type="button"
-          className="app-deliver-pill"
+          className="app-location-button"
           onClick={() => {
             setDraftAddress(address);
             setLocationNote(null);
             setAddressOpen(true);
           }}
         >
-          <span className="app-deliver-label">Deliver to</span>
-          <span className="app-deliver-value">{deliverLabel}</span>
-          <span className="app-deliver-change">Change</span>
+          <span className="app-location-value">{deliverLabel}</span>
+          <span aria-hidden="true">▾</span>
         </button>
-        <label className="app-search">
-          <span className="app-visually-hidden">Search restaurants</span>
-          <input
-            className="app-input"
-            type="search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search restaurants or cuisines"
-          />
-        </label>
+        <span className="app-topbar-actions">
+          <Link
+            href={user ? "/orders" : "/login"}
+            className="app-icon-button"
+            aria-label={user ? "My orders" : "Sign in"}
+          >
+            {user && firstName ? firstName.charAt(0).toUpperCase() : "👤"}
+          </Link>
+          <button
+            type="button"
+            className="app-icon-button"
+            aria-label={`Cart, ${cartCount} items`}
+            onClick={() =>
+              document
+                .getElementById("order-checkout")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+          >
+            🛒
+            {cartCount > 0 && (
+              <span className="app-cart-badge">{cartCount}</span>
+            )}
+          </button>
+        </span>
       </div>
 
       {locationNote && (
@@ -651,28 +769,22 @@ function OrderFlow() {
       ) : (
         <>
           {categories.length > 0 && (
-            <div className="app-category-tiles" role="group" aria-label="Cuisines">
+            <div className="app-category-chips" role="group" aria-label="Cuisines">
               <button
                 type="button"
-                className={`app-category-tile${category === null ? " active" : ""}`}
+                className={`app-category-chip${category === null ? " active" : ""}`}
                 onClick={() => setCategory(null)}
               >
-                <span className="app-category-tile-emoji" aria-hidden="true">
-                  🍽️
-                </span>
-                <span className="app-category-tile-label">All</span>
+                <span aria-hidden="true">🍽️</span> All
               </button>
               {categories.map((c) => (
                 <button
                   key={c}
                   type="button"
-                  className={`app-category-tile${category === c ? " active" : ""}`}
+                  className={`app-category-chip${category === c ? " active" : ""}`}
                   onClick={() => setCategory(category === c ? null : c)}
                 >
-                  <span className="app-category-tile-emoji" aria-hidden="true">
-                    {categoryEmoji(c)}
-                  </span>
-                  <span className="app-category-tile-label">{c}</span>
+                  <span aria-hidden="true">{categoryEmoji(c)}</span> {c}
                 </button>
               ))}
             </div>
@@ -698,6 +810,41 @@ function OrderFlow() {
                           </Link>
                         )}
                       </span>
+                    }
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {user && pastRestaurants.length > 0 && (
+            <section aria-label="Your past orders">
+              <div className="app-section-head">
+                <h2>Your past orders</h2>
+                <Link
+                  href="/orders"
+                  className="app-icon-button"
+                  aria-label="See all orders"
+                >
+                  →
+                </Link>
+              </div>
+              <div className="app-past-row">
+                {pastRestaurants.map(({ order, restaurant }) => (
+                  <PastOrderCard
+                    key={order.id}
+                    order={order}
+                    restaurant={restaurant}
+                    onOrderAgain={
+                      restaurant &&
+                      restaurants.some((r) => r.id === restaurant.id)
+                        ? (r) => {
+                            void handleSelectRestaurant(r);
+                            document
+                              .getElementById("order-menu")
+                              ?.scrollIntoView({ behavior: "smooth" });
+                          }
+                        : undefined
                     }
                   />
                 ))}
@@ -903,6 +1050,32 @@ function OrderFlow() {
         </div>
       )}
 
+      {/* Floating search + cart bar, like the reference app. */}
+      <div className="app-bottombar">
+        <label className="app-bottombar-search">
+          <span className="app-visually-hidden">Search restaurants</span>
+          <input
+            className="app-input"
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search CommonTable"
+          />
+        </label>
+        <button
+          type="button"
+          className="app-bottombar-cart"
+          aria-label={`Cart, ${cartCount} items`}
+          onClick={() =>
+            document
+              .getElementById("order-checkout")
+              ?.scrollIntoView({ behavior: "smooth" })
+          }
+        >
+          🛒{cartCount > 0 ? ` ${cartCount}` : ""}
+        </button>
+      </div>
+
 
       {/* Menu + cart */}
       {selected && (
@@ -1009,7 +1182,7 @@ function OrderFlow() {
 
       {/* Checkout */}
       {selected && cart.length > 0 && (
-        <section className="app-card" aria-label="Checkout">
+        <section className="app-card" aria-label="Checkout" id="order-checkout">
           <h2>Checkout</h2>
           <fieldset className="app-fieldset">
             <legend>How do you want to get it?</legend>
