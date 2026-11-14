@@ -100,7 +100,7 @@ function LoginForm() {
       </form>
       <p className="app-form-foot">
         New to CommonTable?{" "}
-        <Link href="/register">Create a customer account</Link>
+        <Link href="/register">Create an Account</Link>
       </p>
     </div>
   );
