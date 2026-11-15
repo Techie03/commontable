@@ -77,6 +77,10 @@ async def deliver(
             "to_status": "COMPLETED",
         },
     )
+    # Automatic dispatch: the driver is free now, so offer them the
+    # oldest waiting ready order (and then the next, while drivers are free).
+    for next_task in dispatch_service.auto_assign_queue(db):
+        await dispatch_service.announce_assignment(next_task, from_status="READY")
     return task_to_out(task)
 
 

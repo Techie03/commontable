@@ -103,18 +103,20 @@ PLACED → ACCEPTED → PREPARING → READY → ASSIGNED → PICKED_UP → DELIV
 |---|---|---|
 | `GET /api/v1/dispatch/serviceability?postal_code=&city=` | public | Returns `{serviceable, zone_id?, zone_name?, fulfillment_options: ["pickup","standard"]}`. Primary check is the zone postal code list; PostGIS point-in-polygon is used when coordinates are supplied and the DB supports it. |
 | `GET /api/v1/dispatch/board` | dispatcher, admin | Active orders (PLACED→PICKED_UP), ready signals, online drivers. |
-| `POST /api/v1/dispatch/assign` | dispatcher, admin | `{order_id, driver_id}`. Order must be READY. Creates an offered delivery task, order → ASSIGNED. |
+| `POST /api/v1/dispatch/assign` | dispatcher, admin | `{order_id, driver_id}`. Order must be READY. Creates an offered delivery task, order → ASSIGNED. Manual override path — assignment is normally automatic (see the auto-dispatch note below). |
 | `POST /api/v1/dispatch/override` | dispatcher, admin | `{order_id, driver_id, reason}`. Withdraws the current offer/task, creates a new offer, audit event. |
 | `GET /api/v1/drivers/me/offers` | driver | Pending offered tasks with full route + pay shown up front. |
 | `GET /api/v1/drivers/me/tasks` | driver | Active tasks (accepted or picked up) — the driver page restores the active delivery from here. |
 | `POST /api/v1/drivers/me/offers/{task_id}/accept` | driver | Task → accepted. Order stays ASSIGNED. |
-| `POST /api/v1/drivers/me/offers/{task_id}/decline` | driver | Task → declined. Order → READY. |
-| `PATCH /api/v1/drivers/me/availability` | driver | `{online: bool}`. Going online requires onboarding `approved` (403 otherwise); going offline is always allowed. |
+| `POST /api/v1/drivers/me/offers/{task_id}/decline` | driver | Task → declined. Order → READY, then auto-dispatch offers it to the next available driver (the decliner is excluded for that order). |
+| `PATCH /api/v1/drivers/me/availability` | driver | `{online: bool}`. Going online requires onboarding `approved` (403 otherwise); going offline is always allowed. Going online runs the auto-dispatch queue for waiting READY orders. |
 | `GET /api/v1/drivers/me/earnings` | driver | Per-delivery pay breakdown + totals. |
 | `GET /api/v1/drivers/me` | driver | Driver profile incl. onboarding status. |
 | `POST /api/v1/deliveries/{task_id}/pickup` | assigned driver | → PICKED_UP. |
-| `POST /api/v1/deliveries/{task_id}/deliver` | assigned driver | Body: `{proof_note?}`. → DELIVERED (then COMPLETED by the system). |
+| `POST /api/v1/deliveries/{task_id}/deliver` | assigned driver | Body: `{proof_note?}`. → DELIVERED (then COMPLETED by the system). A delivery finishing runs the auto-dispatch queue for waiting READY orders. |
 | `POST /api/v1/deliveries/{task_id}/issue` | assigned driver | `{description}` → support ticket. |
+
+Auto-dispatch: when a delivery order becomes READY it is offered at once to the best available driver — approved, online, no active task, and has not declined that order — fairest first (longest since their last task; a driver who never had a task comes first). Pickup orders never dispatch. When no driver is available the order stays READY and waits; the queue (oldest READY first) runs again when a driver comes online, declines an offer, or finishes a delivery. The transition is audited with reason "Auto-assigned" and the same `offer.created` / `order.driver_assigned` / `order.status_changed` events fire as for a manual assign. Manual assign and override stay as the dispatcher override path.
 
 ### Payments, ledger, refunds
 | Method & path | Role | Notes |
@@ -326,7 +328,8 @@ exactly as they are — do not touch them):
 - `/driver` — availability toggle, offers (route + pay up front),
   accept/decline, active delivery (pickup/deliver), earnings
 - `/dispatch` — board (active orders, ready signals, online drivers),
-  manual assign + override
+  automatic assignment with manual assign + override kept as the
+  override path
 - `/admin` — users, restaurants, drivers, zones, pricing, orders, refunds,
   metrics (sections or sub-pages). The restaurants section lists ALL
   restaurants incl. prospects, with status filters and a clear "prospect,

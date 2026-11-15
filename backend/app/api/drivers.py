@@ -137,6 +137,11 @@ async def decline_offer(
             "to_status": "READY",
         },
     )
+    # Automatic dispatch: offer the order to the next available driver
+    # (the decliner is excluded for this order).
+    reassigned = dispatch_service.auto_assign_order(db, task.order)
+    if reassigned is not None:
+        await dispatch_service.announce_assignment(reassigned, from_status="READY")
     return task_to_out(task)
 
 
@@ -172,6 +177,11 @@ async def set_availability(
         "driver.online" if body.online else "driver.offline",
         {"driver_id": driver.id},
     )
+    # Automatic dispatch: a driver coming online takes the oldest waiting
+    # ready order (and then the next, while drivers are free).
+    if body.online:
+        for task in dispatch_service.auto_assign_queue(db):
+            await dispatch_service.announce_assignment(task, from_status="READY")
     return {"driver_id": driver.id, "online": driver.online}
 
 

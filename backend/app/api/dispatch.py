@@ -89,39 +89,7 @@ async def assign(
     if driver is None:
         raise not_found("Driver not found")
     task = dispatch_service.assign_driver(db, order, driver, user)
-    task_out = task_to_out(task)
-    await manager.broadcast(
-        manager.driver_channel(driver.id),
-        "offer.created",
-        {
-            "task_id": task.id,
-            "order_id": order.id,
-            "pay_cents": task.offered_pay_cents,
-            "restaurant_name": task_out.restaurant_name,
-            "pickup_address": task_out.pickup_address,
-            "dropoff_address": task_out.dropoff_address,
-            "distance_miles": None,
-            "eta_minutes": None,
-            "distance_estimate": "estimate unavailable",
-        },
-    )
-    await manager.broadcast(
-        manager.order_channel(order.id),
-        "order.status_changed",
-        {
-            "order_id": order.id,
-            "from_status": "READY",
-            "to_status": "ASSIGNED",
-        },
-    )
-    await manager.broadcast(
-        manager.order_channel(order.id),
-        "order.driver_assigned",
-        {
-            "order_id": order.id,
-            "driver_name": driver.user.full_name or driver.user.email,
-        },
-    )
+    await dispatch_service.announce_assignment(task, from_status="READY")
     return task_to_out(task)
 
 
@@ -158,28 +126,5 @@ async def override(
             "offer.withdrawn",
             {"task_id": old_task_id},
         )
-    task_out = task_to_out(task)
-    await manager.broadcast(
-        manager.driver_channel(new_driver.id),
-        "offer.created",
-        {
-            "task_id": task.id,
-            "order_id": order.id,
-            "pay_cents": task.offered_pay_cents,
-            "restaurant_name": task_out.restaurant_name,
-            "pickup_address": task_out.pickup_address,
-            "dropoff_address": task_out.dropoff_address,
-            "distance_miles": None,
-            "eta_minutes": None,
-            "distance_estimate": "estimate unavailable",
-        },
-    )
-    await manager.broadcast(
-        manager.order_channel(order.id),
-        "order.driver_assigned",
-        {
-            "order_id": order.id,
-            "driver_name": new_driver.user.full_name or new_driver.user.email,
-        },
-    )
+    await dispatch_service.announce_assignment(task)
     return task_to_out(task)

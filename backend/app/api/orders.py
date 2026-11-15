@@ -36,6 +36,7 @@ from app.schemas.orders import (
     StatusEventOut,
     order_to_out,
 )
+from app.services import dispatch as dispatch_service
 from app.services import orders as order_service
 from app.services.websocket import manager
 
@@ -249,6 +250,12 @@ async def ready_order(
         "order.ready",
         {"order_id": order.id, "order_number": order.order_number},
     )
+    # Automatic dispatch: offer the ready order to the next available
+    # driver at once. When nobody is available the order stays READY and
+    # the queue runs again when a driver comes online or finishes a run.
+    task = dispatch_service.auto_assign_order(db, order)
+    if task is not None:
+        await dispatch_service.announce_assignment(task, from_status="READY")
     return order_to_out(order)
 
 

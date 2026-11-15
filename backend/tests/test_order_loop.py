@@ -69,30 +69,30 @@ def test_full_standard_order_loop(client, seeded):
     assert resp.status_code == 200, resp.text
     assert resp.json()["status"] == "READY"
 
-    # Dispatch board shows the ready order and the online driver with ids.
-    client.patch("/api/v1/drivers/me/availability", json={"online": True}, headers=driver)
+    # Dispatch is automatic: the driver coming online offers them the
+    # waiting ready order at once, with no manual assign step.
+    resp = client.patch(
+        "/api/v1/drivers/me/availability", json={"online": True}, headers=driver
+    )
+    assert resp.status_code == 200, resp.text
     board = client.get("/api/v1/dispatch/board", headers=dispatch)
     assert board.status_code == 200
-    assert any(o["id"] == order_id for o in board.json()["ready_orders"])
+    assert not any(o["id"] == order_id for o in board.json()["ready_orders"])
     assert any(
         d["driver_id"] == seeded["driver_id"] for d in board.json()["online_drivers"]
     )
+    order = client.get(f"/api/v1/orders/{order_id}", headers=customer).json()
+    assert order["status"] == "ASSIGNED"
 
-    # Assign, driver accepts, pickup, deliver.
-    resp = client.post(
-        "/api/v1/dispatch/assign",
-        json={"order_id": order_id, "driver_id": seeded["driver_id"]},
-        headers=dispatch,
-    )
-    assert resp.status_code == 200, resp.text
-    task = resp.json()
+    # The offer is waiting in the driver's offers (auto-assigned, not manual).
+    offers = client.get("/api/v1/drivers/me/offers", headers=driver).json()
+    assert len(offers["items"]) == 1
+    task = offers["items"][0]
     assert task["status"] == "offered"
     assert task["pay_cents"] == 350  # 250 base pay + 100 tip
     task_id = task["id"]
 
-    offers = client.get("/api/v1/drivers/me/offers", headers=driver).json()
-    assert any(o["id"] == task_id and o["pay_cents"] == 350 for o in offers["items"])
-
+    # Driver accepts, pickup, deliver.
     resp = client.post(
         f"/api/v1/drivers/me/offers/{task_id}/accept", headers=driver
     )

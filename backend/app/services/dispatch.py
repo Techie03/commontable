@@ -1,10 +1,16 @@
-"""Dispatch service: manual assignment, override, and driver task flow.
+"""Dispatch service: automatic assignment, manual override, driver task flow.
 
-Slice scope is manual single-order dispatch only (no batching, no OR-Tools,
-no ML). Driver decline reverts the order to READY so the dispatcher can
-reassign.
+Assignment is automatic: when a delivery order becomes ready, it is
+offered to the best available driver (approved, online, no active task,
+has not declined this order), fairest first — the driver who has waited
+longest since their last task. When no driver is available the order
+stays READY and waits; the queue runs again whenever a driver comes
+online, declines an offer, or finishes a delivery. A dispatcher can
+still assign or override by hand; the manual endpoints stay as the
+override path. No batching, no OR-Tools, no ML.
 """
 
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.core.errors import bad_request, not_found
@@ -32,15 +38,25 @@ from app.models.orders import (
     Order,
     StatusEvent,
 )
+from app.schemas.orders import task_to_out
 from app.services import notifications
 from app.services.orders import record_transition
 from app.services.pricing import driver_pay_cents
+from app.services.websocket import manager
+
+# A driver with a task in one of these states is busy and gets no new offer.
+ACTIVE_TASK_STATUSES = [TASK_OFFERED, TASK_ACCEPTED, TASK_PICKED_UP]
 
 
 def assign_driver(
-    db: Session, order: Order, driver: Driver, actor: User
+    db: Session,
+    order: Order,
+    driver: Driver,
+    actor: User | None = None,
+    reason: str | None = None,
 ) -> DeliveryTask:
-    """READY -> ASSIGNED with an offered delivery task."""
+    """READY -> ASSIGNED with an offered delivery task. Actor is None for
+    automatic assignment (a system transition)."""
     if order.fulfillment_type == FULFILLMENT_PICKUP:
         raise bad_request(
             "Pickup orders never go through dispatch; the restaurant completes them",
@@ -63,12 +79,142 @@ def assign_driver(
         offered_pay_cents=pay,
     )
     db.add(task)
-    record_transition(db, order, STATUS_ASSIGNED, actor)
+    record_transition(db, order, STATUS_ASSIGNED, actor, reason=reason)
     driver_name = driver.user.full_name or driver.user.email
     notifications.driver_assigned(db, order, driver_name)
     db.commit()
     db.refresh(task)
     return task
+
+
+def pick_driver(db: Session, order: Order) -> Driver | None:
+    """Best available driver for an order, or None when nobody can take
+    it: approved, online, no active task, and has not declined this
+    order. Fairest first — the driver whose last task is oldest (a
+    driver who never had a task comes first), ties by driver id."""
+    busy_ids = (
+        select(DeliveryTask.driver_id)
+        .where(DeliveryTask.status.in_(ACTIVE_TASK_STATUSES))
+        .distinct()
+    )
+    declined_ids = (
+        select(DeliveryTask.driver_id)
+        .where(
+            DeliveryTask.order_id == order.id,
+            DeliveryTask.status == TASK_DECLINED,
+        )
+        .distinct()
+    )
+    candidates = (
+        db.query(Driver)
+        .filter(
+            Driver.onboarding_status == ONBOARDING_APPROVED,
+            Driver.online.is_(True),
+            ~Driver.id.in_(busy_ids),
+            ~Driver.id.in_(declined_ids),
+        )
+        .all()
+    )
+    if not candidates:
+        return None
+    last_task_ids = dict(
+        db.query(DeliveryTask.driver_id, func.max(DeliveryTask.id))
+        .filter(DeliveryTask.driver_id.in_([d.id for d in candidates]))
+        .group_by(DeliveryTask.driver_id)
+        .all()
+    )
+
+    def fairness_key(driver: Driver) -> tuple[bool, int, int]:
+        last = last_task_ids.get(driver.id)
+        # Never tasked first, then the oldest last task, then lowest id.
+        return (last is not None, last or 0, driver.id)
+
+    candidates.sort(key=fairness_key)
+    return candidates[0]
+
+
+def auto_assign_order(
+    db: Session, order: Order, actor: User | None = None
+) -> DeliveryTask | None:
+    """Offer a READY delivery order to the best available driver.
+    Returns the task, or None when no driver can take it — the order
+    stays READY and waits for the next trigger."""
+    if order.status != STATUS_READY:
+        return None
+    if order.fulfillment_type == FULFILLMENT_PICKUP:
+        return None
+    driver = pick_driver(db, order)
+    if driver is None:
+        return None
+    return assign_driver(db, order, driver, actor, reason="Auto-assigned")
+
+
+def auto_assign_queue(
+    db: Session, actor: User | None = None
+) -> list[DeliveryTask]:
+    """Offer every waiting READY delivery order, oldest first, to the
+    next available driver, until drivers or orders run out. Runs when a
+    driver comes online or finishes a delivery."""
+    waiting = (
+        db.query(Order)
+        .filter(
+            Order.status == STATUS_READY,
+            Order.fulfillment_type != FULFILLMENT_PICKUP,
+        )
+        .order_by(Order.ready_at, Order.id)
+        .all()
+    )
+    tasks: list[DeliveryTask] = []
+    for order in waiting:
+        task = auto_assign_order(db, order, actor)
+        if task is None:
+            break
+        tasks.append(task)
+    return tasks
+
+
+async def announce_assignment(
+    task: DeliveryTask, *, from_status: str | None = None
+) -> None:
+    """Broadcast an assignment (manual or automatic): the offer to the
+    driver, the assignment to the order channel, and the status change
+    when the order moved (READY -> ASSIGNED)."""
+    order = task.order
+    driver = task.driver
+    task_out = task_to_out(task)
+    await manager.broadcast(
+        manager.driver_channel(task.driver_id),
+        "offer.created",
+        {
+            "task_id": task.id,
+            "order_id": order.id,
+            "pay_cents": task.offered_pay_cents,
+            "restaurant_name": task_out.restaurant_name,
+            "pickup_address": task_out.pickup_address,
+            "dropoff_address": task_out.dropoff_address,
+            "distance_miles": None,
+            "eta_minutes": None,
+            "distance_estimate": "estimate unavailable",
+        },
+    )
+    if from_status is not None:
+        await manager.broadcast(
+            manager.order_channel(order.id),
+            "order.status_changed",
+            {
+                "order_id": order.id,
+                "from_status": from_status,
+                "to_status": "ASSIGNED",
+            },
+        )
+    await manager.broadcast(
+        manager.order_channel(order.id),
+        "order.driver_assigned",
+        {
+            "order_id": order.id,
+            "driver_name": driver.user.full_name or driver.user.email,
+        },
+    )
 
 
 def override_assignment(
@@ -131,7 +277,8 @@ def accept_offer(db: Session, task: DeliveryTask, actor: User) -> DeliveryTask:
 
 
 def decline_offer(db: Session, task: DeliveryTask, actor: User) -> DeliveryTask:
-    """Decline reverts the order to READY so the dispatcher can reassign."""
+    """Decline reverts the order to READY; the caller re-runs auto-assign
+    so the next available driver is offered the order."""
     if task.status != TASK_OFFERED:
         raise bad_request(f"Only a pending offer can be declined (now {task.status})")
     task.status = TASK_DECLINED

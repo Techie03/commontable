@@ -1,5 +1,7 @@
 // Dispatch board: active orders, ready signals, online drivers.
-// Manual assignment and override only (no batching in the slice).
+// Assignment is automatic (a ready order is offered to the next
+// available driver); the board keeps manual assign and override for
+// the cases automation cannot cover, like no driver being online.
 
 "use client";
 
@@ -170,6 +172,13 @@ function DispatchBoardView() {
         {live
           ? "Live updates connected. The board refreshes as orders and drivers change."
           : "Live updates are not connected right now. Refresh to see the latest board."}
+      </p>
+      <p className="app-muted">
+        Dispatch is automatic: when an order is ready, it is offered to the
+        next available driver, fairest first. Orders below are waiting
+        because no driver is free right now — they are offered as soon as
+        a driver comes online or finishes a delivery. Assign by hand only
+        to pick a specific driver.
       </p>
       {error && (
         <p className="app-error" role="alert">
