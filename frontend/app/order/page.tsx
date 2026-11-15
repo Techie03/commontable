@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import AppShell from "@/components/AppShell";
 import ApiOffline from "@/components/ApiOffline";
 import FeeBreakdown from "@/components/FeeBreakdown";
+import NotificationBell from "@/components/NotificationBell";
 import { ApiError, checkServiceability, createPaymentIntent, getMenu, listAllComingSoonRestaurants, listOrders, listRestaurants, placeOrder } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { formatCents } from "@/lib/money";
@@ -684,8 +685,8 @@ function OrderFlow() {
         </p>
       )}
 
-      {/* Top bar: delivery location + profile + cart, like the reference
-          app. No bell: there is no notifications system yet. */}
+      {/* Top bar: delivery location + profile + notifications + cart,
+          like the reference app. The bell shows when signed in. */}
       <div className="app-topbar">
         <button
           type="button"
@@ -707,6 +708,7 @@ function OrderFlow() {
           >
             {user && firstName ? firstName.charAt(0).toUpperCase() : "👤"}
           </Link>
+          <NotificationBell />
           <button
             type="button"
             className="app-icon-button"

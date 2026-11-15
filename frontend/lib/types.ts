@@ -358,9 +358,11 @@ export interface SupportTicket {
 
 export interface NotificationItem {
   id: string;
+  type?: string;
   title?: string;
   body?: string;
   message?: string;
+  order_id?: number | string;
   read?: boolean;
   created_at?: string;
 }

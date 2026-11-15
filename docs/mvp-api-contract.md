@@ -145,13 +145,21 @@ Auto-dispatch: when a delivery order becomes READY it is offered at once to the 
 ### Notifications
 | Method & path | Role | Notes |
 |---|---|---|
-| `GET /api/v1/notifications` | auth | Own notifications, newest first. |
+| `GET /api/v1/notifications` | auth | Own notifications, newest first. Returns `{items, page, page_size, total, unread_count}`. |
 | `POST /api/v1/notifications/{id}/read` | auth | Mark one read. |
 | `POST /api/v1/notifications/read-all` | auth | Mark all read. |
 
 A notification row is created for the customer on: accepted, preparing,
 driver assigned, picked up, delivered. The restaurant gets one on order
 placed and order cancelled.
+
+The bell (`frontend/components/NotificationBell.tsx`) shows for signed-in
+users in the app header (all AppShell pages) and in the order feed top
+bar (the header bell hides on `/order` so the page never shows two).
+Badge = `unread_count`; the panel lists newest first, marks one read on
+click (and opens its order when it has one), and offers Mark all read.
+It refreshes on mount, when opened, every 60 seconds, and on window
+focus. The bell rings when the unread count grows.
 
 ## 4. WebSocket channels (§10.8)
 

@@ -2178,12 +2178,16 @@ a {
   border: 1px solid var(--teal);
   border-radius: 0.65rem;
   padding: 0.65rem 1.25rem;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.1s ease;
 }
 
 .app-btn:hover:not(:disabled) {
   background: var(--forest);
   border-color: var(--forest);
+}
+
+.app-btn:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .app-btn:disabled {
@@ -3430,6 +3434,11 @@ select.app-input {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transition: transform 0.2s ease;
+}
+
+.app-feed-card:hover {
+  transform: translateY(-2px);
 }
 
 .app-feed-card-img {
@@ -3438,6 +3447,11 @@ select.app-input {
   object-fit: cover;
   display: block;
   border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+
+.app-feed-card:hover .app-feed-card-img {
+  transform: scale(1.02);
 }
 
 .app-feed-card-ph {
@@ -3592,6 +3606,11 @@ select.app-input {
   font-weight: 700;
   text-decoration: none;
   cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.app-icon-button:active {
+  transform: scale(0.92);
 }
 
 .app-cart-badge {
@@ -3609,6 +3628,204 @@ select.app-input {
   align-items: center;
   justify-content: center;
   padding: 0 0.2rem;
+}
+
+/* Notifications bell: icon button with an unread badge and a dropdown
+   panel. The bell rings when the unread count grows; the badge pops
+   when the count changes. */
+.app-bell {
+  position: relative;
+  display: inline-flex;
+}
+
+.app-bell-btn.ringing > span[aria-hidden="true"] {
+  display: inline-block;
+  animation: bellRing 0.9s ease;
+  transform-origin: 50% 0%;
+}
+
+@keyframes bellRing {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  15% {
+    transform: rotate(14deg);
+  }
+  30% {
+    transform: rotate(-10deg);
+  }
+  45% {
+    transform: rotate(6deg);
+  }
+  60% {
+    transform: rotate(-3deg);
+  }
+  75% {
+    transform: rotate(1deg);
+  }
+}
+
+.app-bell-badge {
+  animation: badgePop 0.3s ease;
+}
+
+@keyframes badgePop {
+  0% {
+    transform: scale(0.5);
+  }
+  60% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.app-bell-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  width: 20rem;
+  max-width: calc(100vw - 2rem);
+  max-height: 24rem;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  box-shadow: 0 0.75rem 2rem rgba(18, 63, 46, 0.16);
+  z-index: 50;
+  animation: panelIn 0.18s ease both;
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.app-bell-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.9rem 0.5rem;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  background: #fff;
+}
+
+.app-bell-mark-all {
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--teal);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0;
+}
+
+.app-bell-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem;
+}
+
+.app-bell-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--charcoal);
+  background: none;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.65rem;
+  cursor: pointer;
+}
+
+.app-bell-item:hover {
+  background: var(--teal-pale);
+}
+
+.app-bell-item.unread {
+  background: var(--teal-pale);
+}
+
+.app-bell-item-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.app-bell-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--teal);
+}
+
+.app-bell-item-body {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--charcoal-soft);
+  margin-top: 0.15rem;
+}
+
+.app-bell-item-time {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--charcoal-soft);
+  margin-top: 0.2rem;
+}
+
+.app-bell-empty {
+  padding: 1.25rem 0.9rem;
+  text-align: center;
+  color: var(--charcoal-soft);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* Page entrance: app pages fade and rise slightly on navigation. */
+.app-main > .container {
+  animation: pageFadeIn 0.3s ease both;
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Motion preferences: keep the new motion off for users who ask for it. */
+@media (prefers-reduced-motion: reduce) {
+  .app-bell-btn.ringing > span[aria-hidden="true"],
+  .app-bell-badge,
+  .app-bell-panel,
+  .app-main > .container {
+    animation: none;
+  }
+  .app-feed-card,
+  .app-feed-card-img,
+  .app-btn,
+  .app-icon-button {
+    transition: none;
+  }
 }
 
 /* Category chips: one scrollable row, like the reference app. */

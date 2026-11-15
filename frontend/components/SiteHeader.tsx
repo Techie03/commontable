@@ -5,13 +5,18 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
+import NotificationBell from "./NotificationBell";
 import PortalsDropdown from "./PortalsDropdown";
 
 export default function SiteHeader() {
   const { user, ready, logout, hasRole } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  // The order feed has its own top bar with a bell, so the header bell
+  // hides there to avoid showing two bells on one page.
+  const showBell = pathname !== "/order";
 
   const isCustomer = hasRole("customer");
   const isRestaurant = hasRole(
@@ -52,6 +57,7 @@ export default function SiteHeader() {
           <PortalsDropdown showSignup={ready && !user} />
           {ready && user ? (
             <>
+              {showBell && <NotificationBell />}
               <span className="app-header-email" title={user.email}>
                 {user.full_name || user.email}
               </span>

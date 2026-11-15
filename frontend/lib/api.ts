@@ -789,6 +789,18 @@ export function listNotifications(): Promise<NotificationItem[]> {
   ).then((r) => (Array.isArray(r) ? r : r.items ?? []));
 }
 
+export interface NotificationsPage {
+  items: NotificationItem[];
+  page: number;
+  page_size: number;
+  total: number;
+  unread_count: number;
+}
+
+export function listNotificationsPage(): Promise<NotificationsPage> {
+  return get<NotificationsPage>("/api/v1/notifications");
+}
+
 export function markNotificationRead(id: string): Promise<void> {
   return post<void>(`/api/v1/notifications/${id}/read`, {});
 }
