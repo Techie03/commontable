@@ -13,12 +13,14 @@ import type {
   BrowseMenu,
   DeliveryTask,
   DispatchBoard,
+  DriverLocation,
   DriverProfile,
   Earnings,
   LedgerEntry,
   MenuItem,
   NotificationItem,
   Order,
+  OrderTracking,
   Paginated,
   PricingRule,
   Restaurant,
@@ -499,6 +501,10 @@ export function getOrder(id: string): Promise<Order> {
   return get<Order>(`/api/v1/orders/${id}`);
 }
 
+export function getOrderTracking(id: string): Promise<OrderTracking> {
+  return get<OrderTracking>(`/api/v1/orders/${id}/tracking`);
+}
+
 export function getOrderEvents(id: string): Promise<StatusEvent[]> {
   return get<Paginated<StatusEvent> | StatusEvent[]>(
     `/api/v1/orders/${id}/events`
@@ -633,6 +639,15 @@ export function declineOffer(taskId: string): Promise<unknown> {
 
 export function setDriverAvailability(online: boolean): Promise<DriverProfile> {
   return patch<DriverProfile>("/api/v1/drivers/me/availability", { online });
+}
+
+export function updateDriverLocation(body: {
+  latitude: number;
+  longitude: number;
+  heading?: number | null;
+  speed?: number | null;
+}): Promise<DriverLocation> {
+  return post<DriverLocation>("/api/v1/drivers/me/location", body);
 }
 
 export function getDriverEarnings(): Promise<Earnings> {

@@ -12,6 +12,13 @@ from app.core.deps import (
 )
 from app.core.errors import bad_request, forbidden, not_found
 from app.db.session import get_db
+from app.models.drivers import (
+    TASK_ACCEPTED,
+    TASK_DELIVERED,
+    TASK_OFFERED,
+    TASK_PICKED_UP,
+    DeliveryTask,
+)
 from app.models.identity import (
     RESTAURANT_ROLES,
     ROLE_CUSTOMER,
@@ -25,15 +32,19 @@ from app.models.orders import (
     Rating,
     StatusEvent,
 )
-from app.models.restaurants import Restaurant
+from app.models.restaurants import Restaurant, RestaurantLocation
 from app.schemas.orders import (
     AcceptOrderRequest,
     CancelOrderRequest,
+    DriverLocationOut,
     OrderCreate,
     OrderOut,
+    OrderTrackingOut,
     RatingRequest,
     RejectOrderRequest,
     StatusEventOut,
+    TrackingDriverOut,
+    TrackingRestaurantOut,
     order_to_out,
 )
 from app.services import dispatch as dispatch_service
@@ -160,6 +171,79 @@ def get_order(
         raise not_found("Order not found")
     require_order_access(order, user)
     return order_to_out(order)
+
+
+@router.get("/{order_id}/tracking", response_model=OrderTrackingOut)
+def get_order_tracking(
+    order_id: int,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Live-tracking snapshot for one order: the assigned driver, their
+    latest reported position (with its timestamp, so the map can tell
+    fresh from stale), and the restaurant's coordinates when known.
+    Same access rule as the order detail itself.
+    """
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if order is None:
+        raise not_found("Order not found")
+    require_order_access(order, user)
+    task = (
+        db.query(DeliveryTask)
+        .filter(
+            DeliveryTask.order_id == order.id,
+            DeliveryTask.status.in_(
+                [TASK_OFFERED, TASK_ACCEPTED, TASK_PICKED_UP, TASK_DELIVERED]
+            ),
+        )
+        .order_by(DeliveryTask.created_at.desc())
+        .first()
+    )
+    driver_out = None
+    location_out = None
+    if task is not None:
+        driver = task.driver
+        driver_out = TrackingDriverOut(
+            id=driver.id,
+            name=driver.user.full_name if driver.user else None,
+        )
+        if (
+            driver.last_latitude is not None
+            and driver.last_longitude is not None
+        ):
+            location_out = DriverLocationOut(
+                driver_id=driver.id,
+                latitude=driver.last_latitude,
+                longitude=driver.last_longitude,
+                heading=driver.last_heading,
+                speed=driver.last_speed,
+                at=driver.last_location_at,
+            )
+    location = (
+        db.query(RestaurantLocation)
+        .filter(
+            RestaurantLocation.restaurant_id == order.restaurant_id,
+            RestaurantLocation.latitude.isnot(None),
+            RestaurantLocation.longitude.isnot(None),
+        )
+        .order_by(RestaurantLocation.id)
+        .first()
+    )
+    restaurant_out = TrackingRestaurantOut(
+        id=order.restaurant_id,
+        name=order.restaurant.name if order.restaurant else None,
+        latitude=location.latitude if location else None,
+        longitude=location.longitude if location else None,
+    )
+    return OrderTrackingOut(
+        order_id=order.id,
+        order_number=order.order_number,
+        status=order.status,
+        fulfillment_type=order.fulfillment_type,
+        driver=driver_out,
+        driver_location=location_out,
+        restaurant=restaurant_out,
+    )
 
 
 @router.get("/{order_id}/events")

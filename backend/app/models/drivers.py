@@ -1,6 +1,6 @@
 """Driver, vehicle, shift, and delivery task models."""
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from app.db.session import Base
@@ -32,6 +32,13 @@ class Driver(Base):
     onboarding_status = Column(String(30), nullable=False, default=ONBOARDING_APPLIED)
     license_verified = Column(Boolean, nullable=False, default=False)
     online = Column(Boolean, nullable=False, default=False)
+    # Last known position, from the driver's own location pings while on
+    # an active delivery. Only the latest ping is kept (no route history).
+    last_latitude = Column(Float, nullable=True)
+    last_longitude = Column(Float, nullable=True)
+    last_heading = Column(Float, nullable=True)
+    last_speed = Column(Float, nullable=True)
+    last_location_at = Column(utc_datetime, nullable=True)
     created_at = Column(utc_datetime, nullable=False, default=utcnow)
 
     user = relationship("User", back_populates="driver_profile")

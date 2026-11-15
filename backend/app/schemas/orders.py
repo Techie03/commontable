@@ -209,6 +209,48 @@ def task_to_out(task) -> DeliveryTaskOut:
     )
 
 
+# -- Live driver tracking ------------------------------------------------
+
+
+class LocationUpdateRequest(BaseModel):
+    latitude: float = Field(ge=-90, le=90)
+    longitude: float = Field(ge=-180, le=180)
+    heading: float | None = Field(default=None, ge=0, lt=360)
+    speed: float | None = Field(default=None, ge=0)
+
+
+class DriverLocationOut(BaseModel):
+    driver_id: int
+    latitude: float
+    longitude: float
+    heading: float | None = None
+    speed: float | None = None
+    at: datetime | None = None
+
+
+class TrackingDriverOut(BaseModel):
+    id: int
+    name: str | None = None
+
+
+class TrackingRestaurantOut(BaseModel):
+    id: int
+    name: str | None = None
+    latitude: float | None = None
+    longitude: float | None = None
+
+
+class OrderTrackingOut(BaseModel):
+    order_id: int
+    order_number: str
+    status: str
+    fulfillment_type: str
+    driver: TrackingDriverOut | None = None
+    driver_location: DriverLocationOut | None = None
+    restaurant: TrackingRestaurantOut | None = None
+
+
+
 class AvailabilityRequest(BaseModel):
     online: bool
 

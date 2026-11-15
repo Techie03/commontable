@@ -4,6 +4,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
 import ApiOffline from "@/components/ApiOffline";
@@ -16,6 +17,7 @@ import {
   getAccessToken,
   getOrder,
   getOrderEvents,
+  getOrderTracking,
   rateOrder,
   wsUrl,
 } from "@/lib/api";
@@ -26,11 +28,21 @@ import {
   orderDisplayName,
   orderEvents,
   orderLineItems,
+  type DriverLocation,
   type Order,
+  type OrderTracking,
   type StatusEvent,
 } from "@/lib/types";
 
+// The map needs the browser window, so it loads only on the client.
+const DeliveryMap = dynamic(() => import("@/components/DeliveryMap"), {
+  ssr: false,
+  loading: () => <p>Loading the live map…</p>,
+});
+
 const CANCELLABLE = ["PLACED", "ACCEPTED", "PREPARING"];
+// A position older than this is shown as the last known one, not live.
+const STALE_MS = 10 * 60 * 1000;
 
 export default function OrderDetailPage({ params }: { params: { id: string } }) {
   return (
@@ -44,6 +56,10 @@ function OrderDetail({ id }: { id: string }) {
   const { user, ready } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [events, setEvents] = useState<StatusEvent[]>([]);
+  const [tracking, setTracking] = useState<OrderTracking | null>(null);
+  const [driverLocation, setDriverLocation] = useState<DriverLocation | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [offline, setOffline] = useState(false);
@@ -59,13 +75,16 @@ function OrderDetail({ id }: { id: string }) {
   const load = useCallback(async () => {
     setError(null);
     try {
-      const [o, evts] = await Promise.all([
+      const [o, evts, tr] = await Promise.all([
         getOrder(id),
         getOrderEvents(id).catch(() => [] as StatusEvent[]),
+        getOrderTracking(id).catch(() => null as OrderTracking | null),
       ]);
       setOrder(o);
       const merged = orderEvents(o).length > 0 ? orderEvents(o) : evts;
       setEvents(merged);
+      setTracking(tr);
+      if (tr?.driver_location) setDriverLocation(tr.driver_location);
     } catch (err) {
       if (err instanceof ApiError && err.unreachable) {
         setOffline(true);
@@ -106,6 +125,22 @@ function OrderDetail({ id }: { id: string }) {
           type?: string;
           data?: Record<string, unknown>;
         };
+        if (msg.type === "driver.location_updated" && msg.data) {
+          // Location pings move the marker directly; refetching the
+          // whole order every 5 seconds would waste the trip.
+          const d = msg.data;
+          if (typeof d.latitude === "number" && typeof d.longitude === "number") {
+            setDriverLocation({
+              driver_id: typeof d.driver_id === "number" ? d.driver_id : 0,
+              latitude: d.latitude,
+              longitude: d.longitude,
+              heading: typeof d.heading === "number" ? d.heading : null,
+              speed: typeof d.speed === "number" ? d.speed : null,
+              at: typeof d.at === "string" ? d.at : null,
+            });
+          }
+          return;
+        }
         if (
           msg.type === "order.status_changed" ||
           msg.type === "order.driver_assigned" ||
@@ -180,6 +215,20 @@ function OrderDetail({ id }: { id: string }) {
   const canRate =
     isCustomer && (order.status === "DELIVERED" || order.status === "COMPLETED");
   const withEvents: Order = { ...order, status_events: events };
+  const showMap =
+    order.fulfillment_type !== "pickup" && tracking?.driver != null;
+  const locationStale =
+    driverLocation?.at != null &&
+    Date.now() - new Date(driverLocation.at).getTime() > STALE_MS;
+  const restaurantCoords =
+    tracking?.restaurant?.latitude != null &&
+    tracking?.restaurant?.longitude != null
+      ? {
+          latitude: tracking.restaurant.latitude,
+          longitude: tracking.restaurant.longitude,
+          name: tracking.restaurant.name,
+        }
+      : null;
 
   return (
     <div className="app-order-detail">
@@ -205,6 +254,34 @@ function OrderDetail({ id }: { id: string }) {
         <p className="app-error" role="alert">
           {error}
         </p>
+      )}
+
+      {showMap && (
+        <section className="app-card" aria-label="Live delivery map">
+          <h2>Live delivery map</h2>
+          {tracking?.driver?.name && <p>Driver: {tracking.driver.name}</p>}
+          {driverLocation == null ? (
+            <p className="app-muted">
+              Waiting for the driver&apos;s location. It appears here once
+              the driver is on the road with your order.
+            </p>
+          ) : locationStale ? (
+            <p className="app-muted">
+              Last known position from{" "}
+              {new Date(driverLocation.at as string).toLocaleTimeString()}.
+              The driver may have lost signal; the map updates when the
+              next position arrives.
+            </p>
+          ) : (
+            <p className="app-muted">
+              Your courier is on the map, moving live.
+            </p>
+          )}
+          <DeliveryMap
+            restaurant={restaurantCoords}
+            driverLocation={driverLocation}
+          />
+        </section>
       )}
 
       <div className="app-detail-grid">

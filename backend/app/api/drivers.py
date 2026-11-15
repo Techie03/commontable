@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.deps import get_current_user, get_driver_profile, require_roles
-from app.core.errors import forbidden, not_found
+from app.core.errors import conflict, forbidden, not_found
 from app.db.session import get_db
 from app.models.common import utcnow
 from app.models.drivers import (
@@ -19,7 +19,9 @@ from app.models.drivers import (
 from app.models.identity import ROLE_DRIVER, User
 from app.schemas.orders import (
     AvailabilityRequest,
+    DriverLocationOut,
     DriverOut,
+    LocationUpdateRequest,
     task_to_out,
 )
 from app.services import dispatch as dispatch_service
@@ -93,6 +95,60 @@ def my_tasks(
         "page_size": len(tasks),
         "total": len(tasks),
     }
+
+
+@router.post("/location", response_model=DriverLocationOut)
+async def update_location(
+    body: LocationUpdateRequest,
+    user: User = Depends(require_roles(ROLE_DRIVER)),
+    db: Session = Depends(get_db),
+):
+    """Record the driver's current position and push it to the active
+    order's channel. Only while on an active delivery (accepted or
+    picked up): a driver with no active delivery has no audience for
+    their position, so the ping is refused instead of stored. Only the
+    latest ping is kept; the timestamp is the server's, not the client's.
+    """
+    driver = get_driver_profile(user, db)
+    task = (
+        db.query(DeliveryTask)
+        .filter(
+            DeliveryTask.driver_id == driver.id,
+            DeliveryTask.status.in_([TASK_ACCEPTED, TASK_PICKED_UP]),
+        )
+        .order_by(DeliveryTask.created_at.desc())
+        .first()
+    )
+    if task is None:
+        raise conflict("No active delivery to share a location for")
+    now = utcnow()
+    driver.last_latitude = body.latitude
+    driver.last_longitude = body.longitude
+    driver.last_heading = body.heading
+    driver.last_speed = body.speed
+    driver.last_location_at = now
+    db.commit()
+    await manager.broadcast(
+        manager.order_channel(task.order_id),
+        "driver.location_updated",
+        {
+            "order_id": task.order_id,
+            "driver_id": driver.id,
+            "latitude": body.latitude,
+            "longitude": body.longitude,
+            "heading": body.heading,
+            "speed": body.speed,
+            "at": now.isoformat(),
+        },
+    )
+    return DriverLocationOut(
+        driver_id=driver.id,
+        latitude=body.latitude,
+        longitude=body.longitude,
+        heading=body.heading,
+        speed=body.speed,
+        at=now,
+    )
 
 
 @router.post("/offers/{task_id}/accept")

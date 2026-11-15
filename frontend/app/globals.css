@@ -3796,6 +3796,53 @@ select.app-input {
   margin: 0;
 }
 
+/* Live delivery map (Leaflet). The container keeps the map below the
+   header dropdowns. */
+.app-map-wrap {
+  margin-top: 0.75rem;
+}
+
+.app-map {
+  height: 18rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  position: relative;
+  z-index: 0;
+  background: var(--warm-sand);
+}
+
+.app-map-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.app-map-marker {
+  background: none;
+  border: none;
+}
+
+.app-map-courier,
+.app-map-restaurant {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--teal);
+  box-shadow: 0 0.25rem 0.75rem rgba(18, 63, 46, 0.25);
+  font-size: 1.1rem;
+}
+
+.app-map-restaurant {
+  border-color: var(--forest);
+}
+
 /* Page entrance: app pages fade and rise slightly on navigation. */
 .app-main > .container {
   animation: pageFadeIn 0.3s ease both;

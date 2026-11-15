@@ -21,6 +21,7 @@ import {
   getDriverTasks,
   reportDeliveryIssue,
   setDriverAvailability,
+  updateDriverLocation,
   wsUrl,
 } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
@@ -59,6 +60,8 @@ function DriverWorkspace() {
   const [proofNote, setProofNote] = useState("");
   const [issueText, setIssueText] = useState("");
   const [issueSent, setIssueSent] = useState(false);
+  const [sharingLocation, setSharingLocation] = useState(false);
+  const [locationNote, setLocationNote] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
   const handleError = useCallback((err: unknown) => {
@@ -167,6 +170,62 @@ function DriverWorkspace() {
       wsRef.current = null;
     };
   }, [profile?.id, user?.id, offline, loadOffers]);
+
+  // Live location: while an active delivery exists, report this
+  // device's position every 5 seconds so the customer can follow the
+  // courier on their tracking map. Nothing is sent without an active
+  // delivery, and pings stop the moment the delivery ends. A denied
+  // or unavailable position stops the loop quietly with a note; the
+  // delivery itself works the same without tracking.
+  useEffect(() => {
+    if (!activeTask) {
+      setSharingLocation(false);
+      setLocationNote(null);
+      return;
+    }
+    if (!("geolocation" in navigator)) {
+      setLocationNote(
+        "Live location is not available on this device, so the customer will not see you on their map."
+      );
+      return;
+    }
+    let stopped = false;
+    let timer: ReturnType<typeof setInterval> | null = null;
+    const send = () => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          if (stopped) return;
+          setSharingLocation(true);
+          updateDriverLocation({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            heading: pos.coords.heading,
+            speed: pos.coords.speed,
+          }).catch(() => {
+            // A failed ping is dropped; the next one follows in 5s.
+          });
+        },
+        (err) => {
+          if (stopped) return;
+          stopped = true;
+          if (timer) clearInterval(timer);
+          setSharingLocation(false);
+          setLocationNote(
+            err.code === err.PERMISSION_DENIED
+              ? "Location access is off, so the customer will not see you on their map. Turn it on in your browser settings to share your live location while you deliver."
+              : "Your position could not be read, so the customer will not see you on their map."
+          );
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 3000 }
+      );
+    };
+    send();
+    timer = setInterval(send, 5000);
+    return () => {
+      stopped = true;
+      if (timer) clearInterval(timer);
+    };
+  }, [activeTask]);
 
   const saveActiveTask = (task: DeliveryTask | null, isPickedUp: boolean) => {
     setActiveTask(task);
@@ -367,6 +426,13 @@ function DriverWorkspace() {
               ? "Picked up. Head to the drop off address."
               : "Head to the restaurant to pick up the order."}
           </p>
+          {sharingLocation && (
+            <p className="app-muted">
+              📍 Sharing your live location with the customer while you
+              deliver.
+            </p>
+          )}
+          {locationNote && <p className="app-muted">{locationNote}</p>}
           {!pickedUp ? (
             <button
               type="button"

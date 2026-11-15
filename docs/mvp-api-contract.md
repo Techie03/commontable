@@ -96,6 +96,7 @@ PLACED → ACCEPTED → PREPARING → READY → ASSIGNED → PICKED_UP → DELIV
 | `POST /api/v1/orders/{id}/complete` | restaurant staff of it | Pickup only, from READY → COMPLETED. |
 | `POST /api/v1/orders/{id}/cancel` | owner customer, restaurant staff, admin | Body: `{reason}`. Only from PLACED/ACCEPTED/PREPARING. |
 | `GET /api/v1/orders/{id}/events` | scoped as order detail | Status-event audit trail. |
+| `GET /api/v1/orders/{id}/tracking` | scoped as order detail | Live-tracking snapshot: assigned driver, their latest reported position (with its timestamp), and the restaurant's coordinates when known. |
 | `POST /api/v1/orders/{id}/ratings` | owner customer | After DELIVERED/COMPLETED. `{score 1-5, comment?}`. |
 
 ### Dispatch, drivers, deliveries
@@ -107,6 +108,7 @@ PLACED → ACCEPTED → PREPARING → READY → ASSIGNED → PICKED_UP → DELIV
 | `POST /api/v1/dispatch/override` | dispatcher, admin | `{order_id, driver_id, reason}`. Withdraws the current offer/task, creates a new offer, audit event. |
 | `GET /api/v1/drivers/me/offers` | driver | Pending offered tasks with full route + pay shown up front. |
 | `GET /api/v1/drivers/me/tasks` | driver | Active tasks (accepted or picked up) — the driver page restores the active delivery from here. |
+| `POST /api/v1/drivers/me/location` | driver | Report the current position (`{latitude, longitude, heading?, speed?}`). Only while on an active delivery (accepted or picked up); otherwise 409. Stores only the latest ping (server timestamp) and broadcasts `driver.location_updated` on the order channel. |
 | `POST /api/v1/drivers/me/offers/{task_id}/accept` | driver | Task → accepted. Order stays ASSIGNED. |
 | `POST /api/v1/drivers/me/offers/{task_id}/decline` | driver | Task → declined. Order → READY, then auto-dispatch offers it to the next available driver (the decliner is excluded for that order). |
 | `PATCH /api/v1/drivers/me/availability` | driver | `{online: bool}`. Going online requires onboarding `approved` (403 otherwise); going offline is always allowed. Going online runs the auto-dispatch queue for waiting READY orders. |
@@ -165,7 +167,9 @@ focus. The bell rings when the unread count grows.
 
 | Channel | Who | Events |
 |---|---|---|
-| `ws /api/v1/ws/orders/{order_id}?token=` | order customer, restaurant staff of it | `order.status_changed {order_id, from_status, to_status, at}`, `order.driver_assigned {order_id, driver_name}`, `order.eta_updated` |
+| `ws /api/v1/ws/orders/{order_id}?token=` | order customer, restaurant staff of it | `order.status_changed {order_id, from_status, to_status, at}`, `order.driver_assigned {order_id, driver_name}`, `order.eta_updated`, `driver.location_updated {order_id, driver_id, latitude, longitude, heading, speed, at}` |
+
+Live driver tracking: while on an active delivery the driver page reports the device's position every 5 seconds (browser geolocation; nothing is sent without an active delivery, and pings stop when the delivery ends). The backend keeps only the latest ping per driver and pushes it to the order channel. The tracking page (`/order/[id]`) shows a Leaflet map (OpenStreetMap tiles, no API key) with the restaurant and the courier, whose marker glides between pings; a position older than 10 minutes is shown as the last known one, not live. No route history is stored, and there is no background tracking: positions only flow while the driver page is open. The dispatch board has no map yet.
 | `ws /api/v1/ws/driver/{driver_id}?token=` | that driver | `offer.created {task_id, order_id, pay_cents, restaurant_name, pickup_address, dropoff_address, distance_miles?, eta_minutes?}`, `offer.withdrawn {task_id}` |
 | `ws /api/v1/ws/dispatch?token=` | dispatcher, admin | `order.placed {order_id}`, `order.ready {order_id}`, `driver.online {driver_id}`, `driver.offline {driver_id}` |
 | `ws /api/v1/ws/restaurant/{restaurant_id}?token=` | staff of it | `order.placed {order_id}`, `order.cancelled {order_id}` |

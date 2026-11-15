@@ -367,6 +367,33 @@ export interface NotificationItem {
   created_at?: string;
 }
 
+/** A driver's latest reported position (live tracking). */
+export interface DriverLocation {
+  driver_id: number;
+  latitude: number;
+  longitude: number;
+  heading?: number | null;
+  speed?: number | null;
+  at?: string | null;
+}
+
+/** Live-tracking snapshot for one order: the assigned driver, their
+ *  latest position, and the restaurant's coordinates when known. */
+export interface OrderTracking {
+  order_id: number;
+  order_number: string;
+  status: string;
+  fulfillment_type: string;
+  driver?: { id: number; name?: string | null } | null;
+  driver_location?: DriverLocation | null;
+  restaurant?: {
+    id: number;
+    name?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+  } | null;
+}
+
 /** Normalize a user's roles into {role, scope_id} rows. Handles all
  *  three shapes the API may return: plain strings, {role, scope_id}
  *  rows, and the live API's {name, scope_type, scope_id} rows. The
