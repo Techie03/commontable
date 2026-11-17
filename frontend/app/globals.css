@@ -4302,3 +4302,18 @@ select.app-input {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* Brand mark: logo tile shown beside the wordmark in both headers. */
+
+.wordmark,
+.lp-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.brand-mark {
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: none;
+}

@@ -25,6 +25,14 @@ export default function LandingHeader() {
     <header className="lp-header">
       <div className="container lp-header-inner">
         <a className="lp-wordmark" href="#top">
+          <img
+            src="/logo-mark.svg"
+            alt=""
+            width={30}
+            height={30}
+            className="brand-mark"
+            aria-hidden="true"
+          />
           CommonTable
         </a>
         <div className="lp-header-actions">

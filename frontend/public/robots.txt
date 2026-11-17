@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# App routes behind sign-in: not public content, keep them out of the index.
+Disallow: /admin/
+Disallow: /dispatch/
+Disallow: /driver/
+Disallow: /orders/
+Disallow: /order/
+Disallow: /restaurant/
+Disallow: /prototype/
+
+Sitemap: https://trycommontable.vercel.app/sitemap.xml

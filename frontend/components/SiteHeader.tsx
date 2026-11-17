@@ -37,6 +37,14 @@ export default function SiteHeader() {
     <header className="app-header">
       <div className="container app-header-inner">
         <Link href="/" className="wordmark">
+          <img
+            src="/logo-mark.svg"
+            alt=""
+            width={30}
+            height={30}
+            className="brand-mark"
+            aria-hidden="true"
+          />
           CommonTable
         </Link>
         <nav className="app-nav" aria-label="Main">
